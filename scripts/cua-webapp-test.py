@@ -217,10 +217,16 @@ def open_browser():
 
 
 def find_webapp_window():
-    """Find the browser window showing the webapp (by title regex, prefer one with links)."""
+    """Find the browser window showing the webapp.
+
+    Prefer a window whose UIA tree has the actual sidebar labels (Dashboard,
+    Tools, ...) as hyperlinks - a Chrome error page or stale tab also has
+    hyperlinks, so title match alone is not enough.
+    """
     try:
         from pywinauto import Desktop
 
+        nav_labels = [r[0] for r in cfg("nav_routes", []) if isinstance(r, (list, tuple)) and r]
         desktop = Desktop(backend="uia")
         candidates = []
         for w in desktop.windows():
@@ -229,8 +235,16 @@ def find_webapp_window():
                 candidates.append(w)
         if not candidates:
             return None
-        # Prefer the window whose UIA tree has hyperlinks (the browser page),
-        # not a bare titlebar stub.
+        # 1) Prefer a window whose UIA tree has the real sidebar labels.
+        for w in candidates:
+            try:
+                links = w.descendants(control_type="Hyperlink")
+                link_texts = [(ln.window_text() or "").strip() for ln in links]
+                if nav_labels and any(any(nl == lt for lt in link_texts) for nl in nav_labels):
+                    return w
+            except Exception:
+                pass
+        # 2) Fallback: any window with hyperlinks (the browser page).
         for w in candidates:
             try:
                 if w.descendants(control_type="Hyperlink"):
@@ -284,6 +298,39 @@ def wait_connected_badge(timeout=None):
     return win, text
 
 
+def _capture_page(win, path):
+    """Capture the webapp page region of a browser window.
+
+    Chrome's PrintWindow (win.capture_as_image) can return a STALE frame of a
+    previously active tab in the same window - e.g. an old 127.0.0.1:10800
+    error tab - instead of the current page. Use a real screen grab
+    (PIL ImageGrab) over the window rect after focusing instead; it captures
+    the actual visible pixels. The stored image is cropped to the page area
+    (below the browser tab strip, above the OS taskbar).
+    """
+    img = None
+    for _ in range(4):
+        try:
+            win.set_focus()
+            time.sleep(0.8)
+            from PIL import ImageGrab
+
+            r = win.rectangle()
+            img = ImageGrab.grab(bbox=(r.left, r.top, r.right, r.bottom))
+            if img is not None:
+                break
+        except Exception:
+            pass
+        time.sleep(1)
+    if img is None:
+        raise RuntimeError("screen grab returned None after 4 retries")
+    w, h = img.size
+    top = int(h * 0.13)   # below the browser tab strip / address bar
+    bottom = int(h * 0.93)  # above the OS taskbar
+    img.crop((0, top, w, bottom)).save(path)
+    return img
+
+
 def nav_click_through(output_dir, win):
     """Title-matching sidebar walk (same strategy as cua-smoke template v3)."""
     nav_routes = cfg("nav_routes", [])
@@ -300,22 +347,54 @@ def nav_click_through(output_dir, win):
     nav_failures = []
     for label, _expected in nav_routes:
         try:
-            link = win.descendants(title=label)
+            win.set_focus()
+            time.sleep(0.5)
+            link = None
+            for _ in range(3):
+                link = win.descendants(title=label)
+                if link:
+                    break
+                time.sleep(1)
             if link:
-                link[0].click_input()
+                # Ambiguity guard: browser chrome also has elements named
+                # "Settings" / "Help" / "Cart" (Chrome menu, bookmark bar).
+                # Prefer the sidebar instance - the webapp sidebar is the
+                # left-most region of the window. Chrome's own controls sit
+                # in the toolbar (top) or top-right corner.
+                try:
+                    sidebar = [e for e in link if e.rectangle().left < win.rectangle().left + 400]
+                except Exception:
+                    sidebar = []
+                target = sidebar[0] if sidebar else link[0]
+                target.click_input()
             else:
                 elements = win.descendants(control_type="Hyperlink")
                 el = [e for e in elements if label.lower() in (e.window_text() or "").lower()]
                 if el:
-                    el[0].click_input()
+                    # Same sidebar-region preference for the fallback path.
+                    try:
+                        sidebar = [e for e in el if e.rectangle().left < win.rectangle().left + 400]
+                    except Exception:
+                        sidebar = []
+                    target = sidebar[0] if sidebar else el[0]
+                    target.click_input()
                 else:
                     nav_failures.append((label, "no link found"))
                     log(f"Nav '{label}': no link found — skipped")
                     continue
             time.sleep(2)
             path = os.path.join(output_dir, f"webapp-{label.lower().replace(' ', '-')}.png")
-            win.capture_as_image().save(path)
-            log(f"Nav '{label}': clicked + screenshot ({os.path.getsize(path)} bytes)")
+            img = _capture_page(win, path)
+            # OCR the captured page as content evidence
+            body_text = ""
+            try:
+                import pytesseract
+
+                pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+                body_text = (pytesseract.image_to_string(img) or "").strip().replace("\n", " ")[:60]
+            except Exception:
+                pass
+            log(f"Nav '{label}': clicked + screenshot ({os.path.getsize(path)} bytes) OCR: {body_text}")
         except Exception as e:
             nav_failures.append((label, str(e)))
             log(f"Nav '{label}' failed (non-fatal): {e}")

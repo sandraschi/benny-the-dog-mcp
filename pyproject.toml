@@ -1,3 +1,10 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/benny_the_dog_mcp"]
+
 [project]
 name = "benny_the_dog_mcp"
 version = "0.1.0"

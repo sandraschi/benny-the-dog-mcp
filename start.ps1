@@ -23,7 +23,7 @@ for ($i = 0; $i -lt 60; $i++) {
     Start-Sleep -Seconds 1
 }
 
-$frontend = Start-Process -FilePath "bun" -ArgumentList "run", "dev" -WorkingDirectory (Join-Path $Root "webapp") -PassThru -WindowStyle Hidden
+$frontend = Start-Process -FilePath "C:\Users\sandr\.bun\bin\bun.exe" -ArgumentList "run", "dev" -WorkingDirectory (Join-Path $Root "webapp") -PassThru -WindowStyle Hidden
 
 if (-not $NoBrowser) {
     $url = "http://127.0.0.1:$FrontendPort"
