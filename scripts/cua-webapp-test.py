@@ -325,7 +325,7 @@ def _capture_page(win, path):
     if img is None:
         raise RuntimeError("screen grab returned None after 4 retries")
     w, h = img.size
-    top = int(h * 0.13)   # below the browser tab strip / address bar
+    top = int(h * 0.13)  # below the browser tab strip / address bar
     bottom = int(h * 0.93)  # above the OS taskbar
     img.crop((0, top, w, bottom)).save(path)
     return img
@@ -390,11 +390,15 @@ def nav_click_through(output_dir, win):
             try:
                 import pytesseract
 
-                pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+                pytesseract.pytesseract.tesseract_cmd = (
+                    r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+                )
                 body_text = (pytesseract.image_to_string(img) or "").strip().replace("\n", " ")[:60]
             except Exception:
                 pass
-            log(f"Nav '{label}': clicked + screenshot ({os.path.getsize(path)} bytes) OCR: {body_text}")
+            log(
+                f"Nav '{label}': clicked + screenshot ({os.path.getsize(path)} bytes) OCR: {body_text}"
+            )
         except Exception as e:
             nav_failures.append((label, str(e)))
             log(f"Nav '{label}' failed (non-fatal): {e}")
