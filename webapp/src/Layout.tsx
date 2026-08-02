@@ -25,7 +25,7 @@ const NAV = [
   { to: "/tools", label: "Tools", icon: Wrench },
   { to: "/skills", label: "Skills", icon: BookOpen },
   { to: "/chat", label: "Chat", icon: MessageSquare },
-  { to: "/members", label: "Members", icon: Users },
+  { to: "/partners", label: "Dog Partners", icon: Users },
   { to: "/shop", label: "Shop", icon: Store },
   { to: "/cart", label: "Cart", icon: ShoppingCart },
   { to: "/jobs", label: "Jobs", icon: CalendarClock },

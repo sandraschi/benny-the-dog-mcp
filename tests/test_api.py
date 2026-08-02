@@ -49,19 +49,30 @@ async def test_skills_endpoints(client):
 
 
 @pytest.mark.asyncio
-async def test_members_crud(client):
-    add = await client.post("/api/members", json={"name": "Sandra", "email": "sandra@fleet.local"})
+async def test_partners_crud(client):
+    import uuid
+
+    email = f"walker-{uuid.uuid4().hex[:8]}@fleet.local"
+    add = await client.post(
+        "/api/partners",
+        json={"name": "Sandra", "email": email, "tags": "dog walker, dog homestay"},
+    )
     assert add.status_code == 200
     assert add.json()["success"] is True
-    member_id = add.json()["member"]["id"]
+    partner_id = add.json()["partner"]["id"]
 
-    listed = await client.get("/api/members")
-    assert any(m["id"] == member_id for m in listed.json()["members"])
+    listed = await client.get("/api/partners")
+    assert any(p["id"] == partner_id for p in listed.json()["partners"])
+    assert listed.json()["partners"][0]["tags"] == "dog walker,dog homestay"
 
-    deleted = await client.delete(f"/api/members/{member_id}")
+    legacy = await client.get("/api/members")
+    assert legacy.json()["success"] is True
+    assert any(p["id"] == partner_id for p in legacy.json()["members"])
+
+    deleted = await client.delete(f"/api/partners/{partner_id}")
     assert deleted.json()["success"] is True
 
-    bad = await client.post("/api/members", json={})
+    bad = await client.post("/api/partners", json={})
     assert bad.json()["success"] is False
 
 

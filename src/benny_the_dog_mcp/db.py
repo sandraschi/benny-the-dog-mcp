@@ -20,11 +20,12 @@ def init_db() -> None:
     with _conn() as conn:
         conn.executescript(
             """
-            CREATE TABLE IF NOT EXISTS members (
+            CREATE TABLE IF NOT EXISTS partners (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
                 email TEXT NOT NULL UNIQUE,
-                role TEXT NOT NULL DEFAULT 'member',
+                role TEXT NOT NULL DEFAULT 'partner',
+                tags TEXT NOT NULL DEFAULT '',
                 created_at TEXT NOT NULL DEFAULT (datetime('now'))
             );
             CREATE TABLE IF NOT EXISTS products (
@@ -100,6 +101,29 @@ def init_db() -> None:
             );
             """
         )
+        _migrate_members_to_partners(conn)
+
+
+def _migrate_members_to_partners(conn: sqlite3.Connection) -> None:
+    """Migrate the legacy `members` roster into `partners` (data-preserving).
+
+    The old scaffold table had name/email/role. The partners table adds a
+    `tags` column (e.g. "dog walker, dog homestay"). Existing rows are copied
+    with their role kept and an empty tag list; the legacy table is dropped.
+    """
+    has_members = conn.execute(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name='members'"
+    ).fetchone()
+    if not has_members:
+        return
+    existing = conn.execute("SELECT COUNT(*) FROM partners").fetchone()[0]
+    if existing == 0:
+        rows = conn.execute("SELECT name, email, role FROM members").fetchall()
+        conn.executemany(
+            "INSERT INTO partners (name, email, role, tags) VALUES (?, ?, ?, '')",
+            [(r["name"], r["email"], r["role"]) for r in rows],
+        )
+    conn.execute("DROP TABLE members")
 
 
 def seed_products() -> None:
@@ -117,25 +141,25 @@ def seed_products() -> None:
             )
 
 
-def list_members() -> list[dict]:
+def list_partners() -> list[dict]:
     with _conn() as conn:
-        rows = conn.execute("SELECT * FROM members ORDER BY id").fetchall()
+        rows = conn.execute("SELECT * FROM partners ORDER BY id").fetchall()
     return [dict(r) for r in rows]
 
 
-def add_member(name: str, email: str, role: str = "member") -> dict:
+def add_partner(name: str, email: str, role: str = "partner", tags: str = "") -> dict:
     with _conn() as conn:
         cur = conn.execute(
-            "INSERT INTO members (name, email, role) VALUES (?, ?, ?)",
-            (name, email, role),
+            "INSERT INTO partners (name, email, role, tags) VALUES (?, ?, ?, ?)",
+            (name, email, role, tags),
         )
-        row = conn.execute("SELECT * FROM members WHERE id = ?", (cur.lastrowid,)).fetchone()
+        row = conn.execute("SELECT * FROM partners WHERE id = ?", (cur.lastrowid,)).fetchone()
     return dict(row)
 
 
-def delete_member(member_id: int) -> bool:
+def delete_partner(partner_id: int) -> bool:
     with _conn() as conn:
-        cur = conn.execute("DELETE FROM members WHERE id = ?", (member_id,))
+        cur = conn.execute("DELETE FROM partners WHERE id = ?", (partner_id,))
     return cur.rowcount > 0
 
 

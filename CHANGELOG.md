@@ -6,6 +6,7 @@ All notable changes to benny-the-dog-mcp are documented here.
 
 ### Added
 
+- **Dog Partners directory** (replaces the scaffold "Members" roster) — name, email, tags (dog walker, dog homestay, sitter, boomy handler, vet contact) with quick-tag chips and `/api/partners` CRUD; `/api/members` kept as a legacy alias and `/members` redirects to `/partners`.
 - **Vaccination schedule** on the Vet page (`/vet`) — log vaccine name, administered date, next due date, notes; due/overdue badges (`GET/POST/DELETE /api/dog/vaccinations`).
 - **Vet visit log** on the Vet page — date, reason, findings, cost; full history (`GET/POST/DELETE /api/dog/vet-visits`).
 - **Vet & health page** (`/vet`) — vet contact (name, phone), breed/age/weight, last checkup, allergies, medications, conditions, and a recent care-event timeline via `GET /api/dog/events`.

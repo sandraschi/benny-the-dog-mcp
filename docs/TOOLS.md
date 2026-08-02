@@ -42,7 +42,7 @@ Gracefully shut down the server (requires `confirm=True`).
 | `GET /skill/{name}` | Raw SKILL.md content |
 | `GET /api/logs?limit=N` | In-memory log ring buffer |
 | `GET /api/jobs`, `POST /api/jobs/{id}/run` | Scheduler jobs (patrol) |
-| `GET/POST /api/members`, `DELETE /api/members/{id}` | Membership roster |
+| `GET/POST /api/partners`, `DELETE /api/partners/{id}` | Dog partners directory (tags: walker, homestay, sitter, ...). `/api/members` is a legacy alias. |
 | `GET /api/products`, `POST /api/orders` | Webshop |
 | `GET/PUT /api/dog/profile` | Dog profile (onboarding) |
 | `GET/POST /api/dog/pics`, `DELETE /api/dog/pics/{id}` | Dog photos (base64) |

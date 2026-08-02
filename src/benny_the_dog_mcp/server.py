@@ -332,34 +332,47 @@ async def api_logs(limit: int = 50) -> dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
-# Membership roster (SQLite)
+# Dog partners (roster with tags - walkers, homestay, sitters, ...)
 # ---------------------------------------------------------------------------
-@app.get("/api/members")
-async def api_members() -> dict[str, Any]:
-    members = _db.list_members()
-    return {"success": True, "members": members, "count": len(members)}
+@app.get("/api/partners")
+async def api_partners() -> dict[str, Any]:
+    partners = _db.list_partners()
+    return {"success": True, "partners": partners, "count": len(partners)}
 
 
-@app.post("/api/members")
-async def api_members_add(payload: dict[str, Any]) -> dict[str, Any]:
+@app.post("/api/partners")
+async def api_partners_add(payload: dict[str, Any]) -> dict[str, Any]:
     name = (payload.get("name") or "").strip()
     email = (payload.get("email") or "").strip()
     if not name or not email:
         return {"success": False, "error": "name and email required"}
+    tags = ",".join(t.strip() for t in (payload.get("tags") or "").split(",") if t.strip())
     try:
-        member = _db.add_member(name, email, (payload.get("role") or "member").strip())
+        partner = _db.add_partner(
+            name,
+            email,
+            (payload.get("role") or "partner").strip(),
+            tags,
+        )
     except Exception as exc:
         return {"success": False, "error": str(exc)}
-    ring_log("roster", "INFO", f"member added: {name} <{email}>")
-    return {"success": True, "member": member}
+    ring_log("roster", "INFO", f"dog partner added: {name} <{email}> tags={tags or '-'}")
+    return {"success": True, "partner": partner}
 
 
-@app.delete("/api/members/{member_id}")
-async def api_members_delete(member_id: int) -> dict[str, Any]:
-    ok = _db.delete_member(member_id)
+@app.delete("/api/partners/{partner_id}")
+async def api_partners_delete(partner_id: int) -> dict[str, Any]:
+    ok = _db.delete_partner(partner_id)
     if ok:
-        ring_log("roster", "INFO", f"member removed: id {member_id}")
-    return {"success": ok, "id": member_id}
+        ring_log("roster", "INFO", f"dog partner removed: id {partner_id}")
+    return {"success": ok, "id": partner_id}
+
+
+@app.get("/api/members")
+async def api_members() -> dict[str, Any]:
+    """Legacy alias - the roster is now the dog partners directory."""
+    partners = _db.list_partners()
+    return {"success": True, "members": partners, "count": len(partners)}
 
 
 # ---------------------------------------------------------------------------

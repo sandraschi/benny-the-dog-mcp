@@ -203,7 +203,12 @@ def wait_frontend():
 
 
 def open_browser():
-    """Open the webapp in the default browser."""
+    """Open the webapp in the default browser - in a FRESH window.
+
+    Opening in the existing Chrome window lets other open tabs (e.g. a stale
+    127.0.0.1:10800 tab) become the active tab, which hijacks the UIA tree
+    and the capture. A new window contains only the webapp tab.
+    """
     if not FRONTEND_PORT:
         return True
     url = f"http://127.0.0.1:{FRONTEND_PORT}"
@@ -219,41 +224,47 @@ def open_browser():
 def find_webapp_window():
     """Find the browser window showing the webapp.
 
-    Prefer a window whose UIA tree has the actual sidebar labels (Dashboard,
-    Tools, ...) as hyperlinks - a Chrome error page or stale tab also has
-    hyperlinks, so title match alone is not enough.
+    STRICT match: the window title must match AND its UIA tree must contain
+    at least 2 of the real sidebar labels (Dashboard, Tools, Chat, ...) as
+    hyperlinks. A stale tab (error page, another webapp on 10800, ...) can
+    have a matching title or random hyperlinks but never the full sidebar.
+    No loose fallback: if nothing matches, return None.
     """
     try:
         from pywinauto import Desktop
 
         nav_labels = [r[0] for r in cfg("nav_routes", []) if isinstance(r, (list, tuple)) and r]
         desktop = Desktop(backend="uia")
-        candidates = []
         for w in desktop.windows():
             title = (w.window_text() or "").lower()
-            if re.search(WINDOW_TITLE_RE.lower(), title):
-                candidates.append(w)
-        if not candidates:
-            return None
-        # 1) Prefer a window whose UIA tree has the real sidebar labels.
-        for w in candidates:
+            if not re.search(WINDOW_TITLE_RE.lower(), title):
+                continue
             try:
                 links = w.descendants(control_type="Hyperlink")
-                link_texts = [(ln.window_text() or "").strip() for ln in links]
-                if nav_labels and any(any(nl == lt for lt in link_texts) for nl in nav_labels):
+                link_texts = {(ln.window_text() or "").strip() for ln in links}
+                hits = sum(1 for nl in nav_labels if nl in link_texts)
+                if hits >= 2:
                     return w
             except Exception:
-                pass
-        # 2) Fallback: any window with hyperlinks (the browser page).
-        for w in candidates:
-            try:
-                if w.descendants(control_type="Hyperlink"):
-                    return w
-            except Exception:
-                pass
-        return candidates[0]
+                continue
+        return None
     except Exception:
         return None
+
+
+def _page_widget(win):
+    """Chrome's page viewport child (the actual web content, no tab strip)."""
+    try:
+        for cls in ("Chrome_RenderWidgetHostHWND", "Chrome_WidgetWin_1", "Intermediate D3D Window"):
+            try:
+                w = win.child_window(class_name=cls)
+                if w.exists(timeout=2):
+                    return w
+            except Exception:
+                continue
+    except Exception:
+        pass
+    return win
 
 
 def wait_connected_badge(timeout=None):
@@ -271,7 +282,9 @@ def wait_connected_badge(timeout=None):
             try:
                 win.set_focus()
                 time.sleep(0.5)
-                img = win.capture_as_image()
+                from PIL import ImageGrab
+
+                img = ImageGrab.grab(bbox=_page_widget(win).rectangle())
                 # OCR via tesseract
                 try:
                     import pytesseract
@@ -303,11 +316,12 @@ def _capture_page(win, path):
 
     Chrome's PrintWindow (win.capture_as_image) can return a STALE frame of a
     previously active tab in the same window - e.g. an old 127.0.0.1:10800
-    error tab - instead of the current page. Use a real screen grab
-    (PIL ImageGrab) over the window rect after focusing instead; it captures
-    the actual visible pixels. The stored image is cropped to the page area
-    (below the browser tab strip, above the OS taskbar).
+    error tab - instead of the current page. Capture the page viewport child
+    (Chrome_RenderWidgetHostHWND) with a real screen grab (PIL ImageGrab)
+    after focusing; that captures the actual visible page pixels without the
+    browser chrome or other tabs.
     """
+    target = _page_widget(win)
     img = None
     for _ in range(4):
         try:
@@ -315,7 +329,7 @@ def _capture_page(win, path):
             time.sleep(0.8)
             from PIL import ImageGrab
 
-            r = win.rectangle()
+            r = target.rectangle()
             img = ImageGrab.grab(bbox=(r.left, r.top, r.right, r.bottom))
             if img is not None:
                 break
@@ -324,10 +338,6 @@ def _capture_page(win, path):
         time.sleep(1)
     if img is None:
         raise RuntimeError("screen grab returned None after 4 retries")
-    w, h = img.size
-    top = int(h * 0.13)  # below the browser tab strip / address bar
-    bottom = int(h * 0.93)  # above the OS taskbar
-    img.crop((0, top, w, bottom)).save(path)
     return img
 
 
@@ -385,6 +395,7 @@ def nav_click_through(output_dir, win):
             time.sleep(2)
             path = os.path.join(output_dir, f"webapp-{label.lower().replace(' ', '-')}.png")
             img = _capture_page(win, path)
+            img.save(path)
             # OCR the captured page as content evidence
             body_text = ""
             try:

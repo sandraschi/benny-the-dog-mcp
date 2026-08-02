@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import Layout from "./Layout";
 import ApiDocs from "./pages/ApiDocs";
 import Cart from "./pages/Cart";
@@ -7,8 +7,8 @@ import Dashboard from "./pages/Dashboard";
 import Help from "./pages/Help";
 import Jobs from "./pages/Jobs";
 import Logs from "./pages/Logs";
-import Members from "./pages/Members";
 import Onboarding from "./pages/Onboarding";
+import Partners from "./pages/Partners";
 import Settings from "./pages/Settings";
 import Shop from "./pages/Shop";
 import Skills from "./pages/Skills";
@@ -27,7 +27,8 @@ export default function App() {
         <Route path="/vet" element={<Vet />} />
         <Route path="/logs" element={<Logs />} />
         <Route path="/api-docs" element={<ApiDocs />} />
-        <Route path="/members" element={<Members />} />
+        <Route path="/partners" element={<Partners />} />
+        <Route path="/members" element={<Navigate to="/partners" replace />} />
         <Route path="/shop" element={<Shop />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/onboarding" element={<Onboarding />} />

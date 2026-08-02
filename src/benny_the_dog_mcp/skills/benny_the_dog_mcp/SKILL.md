@@ -16,6 +16,14 @@ SQLite and can be inspected by humans, agents, and the Boomy robot patrol.
   - `wake` - wake call
 - `example_op` - placeholder demo
 
+## Dog partners
+
+The webapp Dog Partners page (`/partners`) keeps a directory of the people
+who help care for Benny - dog walkers, homestay hosts, sitters, the Boomy
+handler, and vet contacts. Each partner has name, email, and tags
+(`GET/POST/DELETE /api/partners`; `/api/members` is a legacy alias). Use it
+to route care questions to the right human or check who is on duty.
+
 ## Patrol integration
 
 The APScheduler `patrol` job runs every 5 minutes. It reads the dog event
