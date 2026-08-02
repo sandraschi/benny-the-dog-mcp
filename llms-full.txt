@@ -20,6 +20,8 @@ Benny the dog health and care monitor - water bowls, movement, loneliness detect
 - GET /api/jobs - scheduler jobs (APScheduler)
 - GET/PUT /api/dog/profile, GET/POST /api/dog/pics, GET/POST/DELETE /api/dog/tracks - onboarding data
 - GET /api/dog/events - care event timeline (Vet page)
+- GET/POST/DELETE /api/dog/vaccinations - vaccination schedule
+- GET/POST/DELETE /api/dog/vet-visits - vet visit log
 - GET/POST /api/members, DELETE /api/members/{id} - roster (SQLite)
 - GET /api/products, POST /api/orders - webshop (SQLite)
 - /mcp - MCP streamable HTTP endpoint (when enabled)

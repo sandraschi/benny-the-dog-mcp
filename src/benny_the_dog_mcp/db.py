@@ -76,6 +76,22 @@ def init_db() -> None:
                 payload TEXT NOT NULL DEFAULT '{}',
                 created_at TEXT NOT NULL DEFAULT (datetime('now'))
             );
+            CREATE TABLE IF NOT EXISTS dog_vaccinations (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                administered_date TEXT NOT NULL,
+                next_due_date TEXT NOT NULL DEFAULT '',
+                notes TEXT NOT NULL DEFAULT '',
+                created_at TEXT NOT NULL DEFAULT (datetime('now'))
+            );
+            CREATE TABLE IF NOT EXISTS dog_vet_visits (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                visit_date TEXT NOT NULL,
+                reason TEXT NOT NULL,
+                findings TEXT NOT NULL DEFAULT '',
+                cost_cents INTEGER NOT NULL DEFAULT 0,
+                created_at TEXT NOT NULL DEFAULT (datetime('now'))
+            );
             CREATE TABLE IF NOT EXISTS orders (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 items TEXT NOT NULL,
@@ -298,4 +314,56 @@ def add_track(track_type: str, name: str, lat: float, lon: float, notes: str = "
 def delete_track(track_id: int) -> bool:
     with _conn() as conn:
         cur = conn.execute("DELETE FROM dog_tracks WHERE id = ?", (track_id,))
+    return cur.rowcount > 0
+
+
+def list_vaccinations() -> list[dict]:
+    with _conn() as conn:
+        rows = conn.execute(
+            "SELECT * FROM dog_vaccinations ORDER BY administered_date DESC, id DESC"
+        ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def add_vaccination(
+    name: str, administered_date: str, next_due_date: str = "", notes: str = ""
+) -> dict:
+    with _conn() as conn:
+        cur = conn.execute(
+            "INSERT INTO dog_vaccinations (name, administered_date, next_due_date, notes) VALUES (?, ?, ?, ?)",
+            (name, administered_date, next_due_date, notes),
+        )
+        row = conn.execute(
+            "SELECT * FROM dog_vaccinations WHERE id = ?", (cur.lastrowid,)
+        ).fetchone()
+    return dict(row)
+
+
+def delete_vaccination(vacc_id: int) -> bool:
+    with _conn() as conn:
+        cur = conn.execute("DELETE FROM dog_vaccinations WHERE id = ?", (vacc_id,))
+    return cur.rowcount > 0
+
+
+def list_vet_visits() -> list[dict]:
+    with _conn() as conn:
+        rows = conn.execute(
+            "SELECT * FROM dog_vet_visits ORDER BY visit_date DESC, id DESC"
+        ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def add_vet_visit(visit_date: str, reason: str, findings: str = "", cost_cents: int = 0) -> dict:
+    with _conn() as conn:
+        cur = conn.execute(
+            "INSERT INTO dog_vet_visits (visit_date, reason, findings, cost_cents) VALUES (?, ?, ?, ?)",
+            (visit_date, reason, findings, cost_cents),
+        )
+        row = conn.execute("SELECT * FROM dog_vet_visits WHERE id = ?", (cur.lastrowid,)).fetchone()
+    return dict(row)
+
+
+def delete_vet_visit(visit_id: int) -> bool:
+    with _conn() as conn:
+        cur = conn.execute("DELETE FROM dog_vet_visits WHERE id = ?", (visit_id,))
     return cur.rowcount > 0

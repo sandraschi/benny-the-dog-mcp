@@ -29,9 +29,11 @@ autonomy.
 The dog profile (webapp onboarding) records vet contact, allergies,
 medications, last checkup, conditions, and the walk schedule. The webapp
 Vet page (`/vet`) surfaces this plus the recent care-event timeline via
-`GET /api/dog/events`. For health questions, read the profile first and
-recommend contacting the vet (vet_name / vet_phone) for anything beyond
-routine care.
+`GET /api/dog/events`, a vaccination schedule (name, administered date,
+next due, notes) via `/api/dog/vaccinations`, and a vet visit log (date,
+reason, findings, cost) via `/api/dog/vet-visits`. For health questions,
+read the profile first and recommend contacting the vet (vet_name /
+vet_phone) for anything beyond routine care.
 
 ## Usage
 

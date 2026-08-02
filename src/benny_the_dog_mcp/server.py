@@ -461,6 +461,67 @@ async def api_dog_events(event_type: str = "", limit: int = 50) -> dict[str, Any
     return {"success": True, "events": events, "count": len(events)}
 
 
+# ---------------------------------------------------------------------------
+# Vaccination schedule (Vet page)
+# ---------------------------------------------------------------------------
+@app.get("/api/dog/vaccinations")
+async def api_dog_vaccinations() -> dict[str, Any]:
+    return {
+        "success": True,
+        "vaccinations": _db.list_vaccinations(),
+        "count": len(_db.list_vaccinations()),
+    }
+
+
+@app.post("/api/dog/vaccinations")
+async def api_dog_vaccinations_add(payload: dict[str, Any]) -> dict[str, Any]:
+    name = (payload.get("name") or "").strip()
+    administered = (payload.get("administered_date") or "").strip()
+    if not name or not administered:
+        return {"success": False, "error": "name and administered_date required"}
+    vacc = _db.add_vaccination(
+        name,
+        administered,
+        (payload.get("next_due_date") or "").strip(),
+        (payload.get("notes") or "").strip(),
+    )
+    ring_log("vet", "INFO", f"vaccination logged: {name} ({administered})")
+    return {"success": True, "vaccination": vacc}
+
+
+@app.delete("/api/dog/vaccinations/{vacc_id}")
+async def api_dog_vaccinations_delete(vacc_id: int) -> dict[str, Any]:
+    return {"success": _db.delete_vaccination(vacc_id), "id": vacc_id}
+
+
+# ---------------------------------------------------------------------------
+# Vet visit log (Vet page)
+# ---------------------------------------------------------------------------
+@app.get("/api/dog/vet-visits")
+async def api_dog_vet_visits() -> dict[str, Any]:
+    return {"success": True, "visits": _db.list_vet_visits(), "count": len(_db.list_vet_visits())}
+
+
+@app.post("/api/dog/vet-visits")
+async def api_dog_vet_visits_add(payload: dict[str, Any]) -> dict[str, Any]:
+    visit_date = (payload.get("visit_date") or "").strip()
+    reason = (payload.get("reason") or "").strip()
+    if not visit_date or not reason:
+        return {"success": False, "error": "visit_date and reason required"}
+    try:
+        cost = int(payload.get("cost_cents") or 0)
+    except (TypeError, ValueError):
+        cost = 0
+    visit = _db.add_vet_visit(visit_date, reason, (payload.get("findings") or "").strip(), cost)
+    ring_log("vet", "INFO", f"vet visit logged: {visit_date} - {reason}")
+    return {"success": True, "visit": visit}
+
+
+@app.delete("/api/dog/vet-visits/{visit_id}")
+async def api_dog_vet_visits_delete(visit_id: int) -> dict[str, Any]:
+    return {"success": _db.delete_vet_visit(visit_id), "id": visit_id}
+
+
 # Scheduler (APScheduler periodic jobs) - the robot patrol foundation
 # ---------------------------------------------------------------------------
 if os.environ.get("ENABLE_SCHEDULER", "1") == "1":

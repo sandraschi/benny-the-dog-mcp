@@ -138,3 +138,52 @@ async def test_dog_events_endpoint(client):
 
     capped = await client.get("/api/dog/events?limit=9999")
     assert capped.json()["count"] <= 200
+
+
+@pytest.mark.asyncio
+async def test_vaccinations_crud(client):
+    add = await client.post(
+        "/api/dog/vaccinations",
+        json={
+            "name": "Rabies",
+            "administered_date": "2026-01-15",
+            "next_due_date": "2027-01-15",
+            "notes": "booster",
+        },
+    )
+    assert add.json()["success"] is True
+    vacc_id = add.json()["vaccination"]["id"]
+
+    listed = await client.get("/api/dog/vaccinations")
+    assert any(v["id"] == vacc_id for v in listed.json()["vaccinations"])
+
+    deleted = await client.delete(f"/api/dog/vaccinations/{vacc_id}")
+    assert deleted.json()["success"] is True
+
+    bad = await client.post("/api/dog/vaccinations", json={"name": "X"})
+    assert bad.json()["success"] is False
+
+
+@pytest.mark.asyncio
+async def test_vet_visits_crud(client):
+    add = await client.post(
+        "/api/dog/vet-visits",
+        json={
+            "visit_date": "2026-06-01",
+            "reason": "annual checkup",
+            "findings": "healthy",
+            "cost_cents": 6500,
+        },
+    )
+    assert add.json()["success"] is True
+    visit_id = add.json()["visit"]["id"]
+
+    listed = await client.get("/api/dog/vet-visits")
+    assert any(v["id"] == visit_id for v in listed.json()["visits"])
+    assert listed.json()["visits"][0]["cost_cents"] == 6500
+
+    deleted = await client.delete(f"/api/dog/vet-visits/{visit_id}")
+    assert deleted.json()["success"] is True
+
+    bad = await client.post("/api/dog/vet-visits", json={"visit_date": "2026-06-01"})
+    assert bad.json()["success"] is False

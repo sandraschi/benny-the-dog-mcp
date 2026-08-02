@@ -6,6 +6,8 @@ All notable changes to benny-the-dog-mcp are documented here.
 
 ### Added
 
+- **Vaccination schedule** on the Vet page (`/vet`) — log vaccine name, administered date, next due date, notes; due/overdue badges (`GET/POST/DELETE /api/dog/vaccinations`).
+- **Vet visit log** on the Vet page — date, reason, findings, cost; full history (`GET/POST/DELETE /api/dog/vet-visits`).
 - **Vet & health page** (`/vet`) — vet contact (name, phone), breed/age/weight, last checkup, allergies, medications, conditions, and a recent care-event timeline via `GET /api/dog/events`.
 - Initial scaffold: FastMCP 3.4 server with `dog_ops` portmanteau (status, water_refill, bark_event, movement, sausage_delivery, movie_time, wake), `app_info`, `server_shutdown`.
 - SQLite storage (members, products, orders, dog_profile, dog_pics, dog_tracks, dog_events) with WAL.
