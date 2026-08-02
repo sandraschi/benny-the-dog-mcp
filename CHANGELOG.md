@@ -6,6 +6,7 @@ All notable changes to benny-the-dog-mcp are documented here.
 
 ### Added
 
+- **Vet & health page** (`/vet`) — vet contact (name, phone), breed/age/weight, last checkup, allergies, medications, conditions, and a recent care-event timeline via `GET /api/dog/events`.
 - Initial scaffold: FastMCP 3.4 server with `dog_ops` portmanteau (status, water_refill, bark_event, movement, sausage_delivery, movie_time, wake), `app_info`, `server_shutdown`.
 - SQLite storage (members, products, orders, dog_profile, dog_pics, dog_tracks, dog_events) with WAL.
 - FastAPI REST surface: /api/health, /api/v1/diagnostics, /api/tools, /api/capabilities, /api/skills, /api/logs, /api/jobs, /api/members, /api/products, /api/orders, /api/dog/*.

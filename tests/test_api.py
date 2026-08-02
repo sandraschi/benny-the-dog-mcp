@@ -123,3 +123,18 @@ async def test_dog_pics_crud(client):
 async def test_dog_tracks_validation(client):
     bad = await client.post("/api/dog/tracks", json={"track_type": "cave", "name": "x"})
     assert bad.json()["success"] is False
+
+
+@pytest.mark.asyncio
+async def test_dog_events_endpoint(client):
+    await client.post("/api/dog/tracks", json={"track_type": "park", "name": "x"})
+    listed = await client.get("/api/dog/events?limit=10")
+    assert listed.status_code == 200
+    assert listed.json()["success"] is True
+    assert listed.json()["count"] <= 10
+
+    empty = await client.get("/api/dog/events?event_type=nonexistent")
+    assert empty.json()["count"] == 0
+
+    capped = await client.get("/api/dog/events?limit=9999")
+    assert capped.json()["count"] <= 200

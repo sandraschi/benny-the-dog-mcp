@@ -47,6 +47,7 @@ Gracefully shut down the server (requires `confirm=True`).
 | `GET/PUT /api/dog/profile` | Dog profile (onboarding) |
 | `GET/POST /api/dog/pics`, `DELETE /api/dog/pics/{id}` | Dog photos (base64) |
 | `GET/POST /api/dog/tracks`, `DELETE /api/dog/tracks/{id}` | Dogparks & fountains |
+| `GET /api/dog/events?limit=N&event_type=T` | Care event timeline (Vet page; max 200) |
 | `/mcp` | MCP streamable HTTP endpoint |
 | `/docs` | FastAPI Swagger UI |
 | `/ws` | Echo WebSocket (only when `ENABLE_REALTIME=1`) |

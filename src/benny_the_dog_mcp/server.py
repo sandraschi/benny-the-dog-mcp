@@ -450,6 +450,17 @@ async def api_dog_tracks_delete(track_id: int) -> dict[str, Any]:
     return {"success": _db.delete_track(track_id), "id": track_id}
 
 
+@app.get("/api/dog/events")
+async def api_dog_events(event_type: str = "", limit: int = 50) -> dict[str, Any]:
+    """Recent dog care events (water, barks, movement, sausages, movies, wakes).
+
+    Powers the Vet page care timeline. Bounded by `limit` (default 50, max 200).
+    """
+    capped = min(max(limit, 1), 200)
+    events = _db.dog_events(event_type or None, limit=capped)
+    return {"success": True, "events": events, "count": len(events)}
+
+
 # Scheduler (APScheduler periodic jobs) - the robot patrol foundation
 # ---------------------------------------------------------------------------
 if os.environ.get("ENABLE_SCHEDULER", "1") == "1":

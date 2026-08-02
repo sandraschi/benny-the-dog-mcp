@@ -24,6 +24,15 @@ loneliness flag and recommends a sausage delivery. Wire `dog_ops`
 movement/sausage calls to the Boomy robot camera + claw for full
 autonomy.
 
+## Vet & health
+
+The dog profile (webapp onboarding) records vet contact, allergies,
+medications, last checkup, conditions, and the walk schedule. The webapp
+Vet page (`/vet`) surfaces this plus the recent care-event timeline via
+`GET /api/dog/events`. For health questions, read the profile first and
+recommend contacting the vet (vet_name / vet_phone) for anything beyond
+routine care.
+
 ## Usage
 
 ```python

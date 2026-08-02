@@ -26,7 +26,7 @@ bun --prefix webapp install
 - **Care events**: log water refills, barks, movement, sausage deliveries, projector movie time, and wake calls via the `dog_ops` MCP tool.
 - **Loneliness detection**: the 5-minute patrol job (APScheduler) flags barks with no subsequent movement and suggests a sausage delivery.
 - **Dog profile**: 6-step onboarding wizard (bio, photos, vet & health, behaviour, walking, dogparks/fountains).
-- **Webapp**: Dashboard, Tools, Skills, Chat (local LLM), Settings, Help, Logs, ApiDocs, Jobs, Members, Shop, Cart, Onboarding.
+- **Webapp**: Dashboard, Tools, Skills, Chat (local LLM), Vet & Health, Settings, Help, Logs, ApiDocs, Jobs, Members, Shop, Cart, Onboarding.
 - **Robot-ready**: `actor="boomy"` on every event for the Boomy robot patrol.
 
 ## Tools

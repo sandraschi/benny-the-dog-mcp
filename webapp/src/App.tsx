@@ -13,6 +13,7 @@ import Settings from "./pages/Settings";
 import Shop from "./pages/Shop";
 import Skills from "./pages/Skills";
 import Tools from "./pages/Tools";
+import Vet from "./pages/Vet";
 
 export default function App() {
   return (
@@ -23,6 +24,7 @@ export default function App() {
         <Route path="/skills" element={<Skills />} />
         <Route path="/chat" element={<Chat />} />
         <Route path="/jobs" element={<Jobs />} />
+        <Route path="/vet" element={<Vet />} />
         <Route path="/logs" element={<Logs />} />
         <Route path="/api-docs" element={<ApiDocs />} />
         <Route path="/members" element={<Members />} />
