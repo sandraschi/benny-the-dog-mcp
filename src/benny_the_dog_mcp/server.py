@@ -297,6 +297,72 @@ async def api_orders_create(payload: dict[str, Any]) -> dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------
+# Dog profile, pics, and tracks (onboarding data)
+# ---------------------------------------------------------------------------
+@app.get("/api/dog/profile")
+async def api_dog_profile() -> dict[str, Any]:
+    profile = _db.get_dog_profile()
+    if profile is None:
+        return {"success": True, "profile": None}
+    return {"success": True, "profile": profile}
+
+
+@app.put("/api/dog/profile")
+async def api_dog_profile_save(payload: dict[str, Any]) -> dict[str, Any]:
+    profile = _db.save_dog_profile(payload)
+    ring_log("benny", "INFO", f"dog profile saved for {profile.get('name', '?')}")
+    return {"success": True, "profile": profile}
+
+
+@app.get("/api/dog/pics")
+async def api_dog_pics() -> dict[str, Any]:
+    return {"success": True, "pics": _db.list_dog_pics()}
+
+
+@app.post("/api/dog/pics")
+async def api_dog_pics_add(payload: dict[str, Any]) -> dict[str, Any]:
+    name = (payload.get("name") or "benny.jpg").strip()
+    mime = (payload.get("mime") or "image/jpeg").strip()
+    data = (payload.get("data") or "").strip()
+    if not data:
+        return {"success": False, "error": "data (base64) required"}
+    pic = _db.add_dog_pic(name, mime, data)
+    return {"success": True, "pic": pic}
+
+
+@app.delete("/api/dog/pics/{pic_id}")
+async def api_dog_pics_delete(pic_id: int) -> dict[str, Any]:
+    return {"success": _db.delete_dog_pic(pic_id), "id": pic_id}
+
+
+@app.get("/api/dog/tracks")
+async def api_dog_tracks(track_type: str = "") -> dict[str, Any]:
+    tracks = _db.list_tracks(track_type or None)
+    return {"success": True, "tracks": tracks, "count": len(tracks)}
+
+
+@app.post("/api/dog/tracks")
+async def api_dog_tracks_add(payload: dict[str, Any]) -> dict[str, Any]:
+    track_type = (payload.get("track_type") or "").strip()
+    name = (payload.get("name") or "").strip()
+    if track_type not in ("park", "fountain") or not name:
+        return {"success": False, "error": "track_type (park|fountain) and name required"}
+    track = _db.add_track(
+        track_type,
+        name,
+        float(payload.get("lat") or 0),
+        float(payload.get("lon") or 0),
+        (payload.get("notes") or "").strip(),
+    )
+    return {"success": True, "track": track}
+
+
+@app.delete("/api/dog/tracks/{track_id}")
+async def api_dog_tracks_delete(track_id: int) -> dict[str, Any]:
+    return {"success": _db.delete_track(track_id), "id": track_id}
+
 # Scheduler (APScheduler periodic jobs) - the robot patrol foundation
 # ---------------------------------------------------------------------------
 if os.environ.get("ENABLE_SCHEDULER", "1") == "1":
@@ -417,4 +483,5 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+
 

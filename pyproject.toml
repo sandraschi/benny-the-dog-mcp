@@ -7,6 +7,7 @@ requires-python = ">=3.11"
 dependencies = [
     "fastmcp[tasks]>=3.4.4,<4",
     "prefab-ui>=0.14.0",
+    "fastapi>=0.115",
     "uvicorn[standard]>=0.30",
     "httpx>=0.27",
     "APScheduler>=3.10,<4",
@@ -31,5 +32,7 @@ select = ["E", "F", "W", "I", "UP", "B"]
 ignore = ["E501"]
 
 [tool.pytest.ini_options]
+pythonpath = ["src"]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+

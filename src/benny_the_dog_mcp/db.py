@@ -33,6 +33,43 @@ def init_db() -> None:
                 price_cents INTEGER NOT NULL,
                 description TEXT NOT NULL DEFAULT ''
             );
+            CREATE TABLE IF NOT EXISTS dog_profile (
+                id INTEGER PRIMARY KEY CHECK (id = 1),
+                name TEXT NOT NULL DEFAULT 'Benny',
+                breed TEXT NOT NULL DEFAULT '',
+                age_years REAL NOT NULL DEFAULT 0,
+                weight_kg REAL NOT NULL DEFAULT 0,
+                bio TEXT NOT NULL DEFAULT '',
+                vet_name TEXT NOT NULL DEFAULT '',
+                vet_phone TEXT NOT NULL DEFAULT '',
+                allergies TEXT NOT NULL DEFAULT '',
+                medications TEXT NOT NULL DEFAULT '',
+                last_checkup TEXT NOT NULL DEFAULT '',
+                conditions TEXT NOT NULL DEFAULT '',
+                energy_level TEXT NOT NULL DEFAULT 'medium',
+                temperament TEXT NOT NULL DEFAULT '',
+                barkiness TEXT NOT NULL DEFAULT 'medium',
+                socialization TEXT NOT NULL DEFAULT '',
+                fears TEXT NOT NULL DEFAULT '',
+                walk_times TEXT NOT NULL DEFAULT '',
+                walk_duration_min INTEGER NOT NULL DEFAULT 30,
+                walk_route TEXT NOT NULL DEFAULT '',
+                onboarded INTEGER NOT NULL DEFAULT 0
+            );
+            CREATE TABLE IF NOT EXISTS dog_pics (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                mime TEXT NOT NULL DEFAULT 'image/jpeg',
+                data_base64 TEXT NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS dog_tracks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                track_type TEXT NOT NULL,
+                name TEXT NOT NULL,
+                lat REAL NOT NULL DEFAULT 0,
+                lon REAL NOT NULL DEFAULT 0,
+                notes TEXT NOT NULL DEFAULT ''
+            );
             CREATE TABLE IF NOT EXISTS dog_events (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 event_type TEXT NOT NULL,
@@ -142,3 +179,77 @@ def dog_events(event_type: str | None = None, limit: int = 20) -> list[dict]:
             pass
         out.append(d)
     return out
+
+
+def get_dog_profile() -> dict | None:
+    with _conn() as conn:
+        row = conn.execute("SELECT * FROM dog_profile WHERE id = 1").fetchone()
+    return dict(row) if row else None
+
+
+def save_dog_profile(p: dict) -> dict:
+    fields = [
+        "name", "breed", "age_years", "weight_kg", "bio", "vet_name",
+        "vet_phone", "allergies", "medications", "last_checkup", "conditions",
+        "energy_level", "temperament", "barkiness", "socialization", "fears",
+        "walk_times", "walk_duration_min", "walk_route", "onboarded",
+    ]
+    with _conn() as conn:
+        conn.execute(
+            "INSERT INTO dog_profile (id, " + ", ".join(fields) + ") VALUES (1, " +
+            ", ".join(["?"] * len(fields)) + ") " +
+            "ON CONFLICT(id) DO UPDATE SET " +
+            ", ".join([f"{f} = excluded.{f}" for f in fields]),
+            tuple(p.get(f, "" if f in ("name", "breed", "bio", "vet_name", "vet_phone", "allergies", "medications", "last_checkup", "conditions", "energy_level", "temperament", "barkiness", "socialization", "fears", "walk_times", "walk_route") else 0 if f in ("age_years", "weight_kg", "walk_duration_min") else 1) for f in fields),
+        )
+        row = conn.execute("SELECT * FROM dog_profile WHERE id = 1").fetchone()
+    return dict(row)
+
+
+def add_dog_pic(name: str, mime: str, data_base64: str) -> dict:
+    with _conn() as conn:
+        cur = conn.execute(
+            "INSERT INTO dog_pics (name, mime, data_base64) VALUES (?, ?, ?)",
+            (name, mime, data_base64),
+        )
+        row = conn.execute("SELECT id, name, mime FROM dog_pics WHERE id = ?", (cur.lastrowid,)).fetchone()
+    return dict(row)
+
+
+def list_dog_pics() -> list[dict]:
+    with _conn() as conn:
+        rows = conn.execute("SELECT id, name, mime, data_base64 FROM dog_pics ORDER BY id").fetchall()
+    return [dict(r) for r in rows]
+
+
+def delete_dog_pic(pic_id: int) -> bool:
+    with _conn() as conn:
+        cur = conn.execute("DELETE FROM dog_pics WHERE id = ?", (pic_id,))
+    return cur.rowcount > 0
+
+
+def list_tracks(track_type: str | None = None) -> list[dict]:
+    with _conn() as conn:
+        if track_type:
+            rows = conn.execute(
+                "SELECT * FROM dog_tracks WHERE track_type = ? ORDER BY id", (track_type,)
+            ).fetchall()
+        else:
+            rows = conn.execute("SELECT * FROM dog_tracks ORDER BY id").fetchall()
+    return [dict(r) for r in rows]
+
+
+def add_track(track_type: str, name: str, lat: float, lon: float, notes: str = "") -> dict:
+    with _conn() as conn:
+        cur = conn.execute(
+            "INSERT INTO dog_tracks (track_type, name, lat, lon, notes) VALUES (?, ?, ?, ?, ?)",
+            (track_type, name, lat, lon, notes),
+        )
+        row = conn.execute("SELECT * FROM dog_tracks WHERE id = ?", (cur.lastrowid,)).fetchone()
+    return dict(row)
+
+
+def delete_track(track_id: int) -> bool:
+    with _conn() as conn:
+        cur = conn.execute("DELETE FROM dog_tracks WHERE id = ?", (track_id,))
+    return cur.rowcount > 0

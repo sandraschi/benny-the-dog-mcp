@@ -2,6 +2,15 @@ import { useEffect, useState } from "react";
 import { Activity, Cpu, Server, Wrench } from "lucide-react";
 import { fetchHealth, type HealthInfo } from "../lib/api";
 
+const API_BASE = "http://127.0.0.1:11142";
+
+interface DogCard {
+  name: string;
+  breed: string;
+  bio: string;
+  energy_level: string;
+}
+
 function Kpi({
   testid,
   label,
@@ -29,11 +38,26 @@ function Kpi({
 
 export default function Dashboard() {
   const [health, setHealth] = useState<HealthInfo | null>(null);
+  const [dog, setDog] = useState<DogCard | null>(null);
+  const [dogPic, setDogPic] = useState<string | null>(null);
 
   useEffect(() => {
     fetchHealth()
       .then(setHealth)
       .catch(() => setHealth(null));
+    fetch(`${API_BASE}/api/dog/profile`)
+      .then((r) => r.json())
+      .then((j) => {
+        if (j.profile) setDog(j.profile);
+      })
+      .catch(() => undefined);
+    fetch(`${API_BASE}/api/dog/pics`)
+      .then((r) => r.json())
+      .then((j) => {
+        const first = j.pics?.[0];
+        if (first) setDogPic(`data:${first.mime};base64,${first.data_base64}`);
+      })
+      .catch(() => undefined);
   }, []);
 
   return (
@@ -41,7 +65,7 @@ export default function Dashboard() {
       {localStorage.getItem("benny-the-dog-mcp-onboarded") !== "1" && (
         <div className="flex items-center justify-between rounded-lg border border-amber-800/50 bg-amber-950/30 p-4">
           <span className="text-sm text-amber-300">
-            Welcome! Finish the quick onboarding to get the most out of benny-the-dog-mcp.
+            Welcome! Finish the dog onboarding to get the most out of benny-the-dog-mcp.
           </span>
           <a
             href="/onboarding"
@@ -50,6 +74,30 @@ export default function Dashboard() {
             Start
           </a>
         </div>
+      )}
+      {dog && (
+        <section
+          className="flex items-center gap-4 rounded-xl border border-amber-900/40 bg-gradient-to-br from-amber-950/40 to-zinc-900 p-6"
+          data-testid="dog-card"
+        >
+          {dogPic && (
+            <img
+              src={dogPic}
+              alt={dog.name}
+              className="h-20 w-20 rounded-full border-2 border-amber-700 object-cover"
+            />
+          )}
+          <div>
+            <h3 className="text-lg font-semibold text-amber-400">{dog.name}</h3>
+            <p className="text-sm text-zinc-400">
+              {dog.breed || "mystery breed"} · energy: {dog.energy_level}
+            </p>
+            <p className="mt-1 max-w-xl text-xs text-zinc-500">{dog.bio}</p>
+            <a href="/onboarding" className="mt-2 inline-block text-xs text-amber-500 hover:underline">
+              Edit profile
+            </a>
+          </div>
+        </section>
       )}
       <section className="rounded-xl border border-zinc-800 bg-gradient-to-br from-zinc-900 to-zinc-950 p-8">
         <h2 className="text-3xl font-bold text-white">benny-the-dog-mcp</h2>
