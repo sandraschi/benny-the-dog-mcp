@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
 import { Activity, Cpu, Server, Wrench } from "lucide-react";
-import { fetchHealth, type HealthInfo } from "../lib/api";
+import { useEffect, useState } from "react";
+import { type HealthInfo, fetchHealth } from "../lib/api";
 
 const API_BASE = "http://127.0.0.1:11142";
 
@@ -23,10 +23,7 @@ function Kpi({
   icon: typeof Server;
 }) {
   return (
-    <div
-      data-testid={testid}
-      className="rounded-lg border border-zinc-800 bg-zinc-900 p-4"
-    >
+    <div data-testid={testid} className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
       <div className="flex items-center gap-2 text-zinc-400">
         <Icon size={16} />
         <span className="text-xs uppercase tracking-wide">{label}</span>
@@ -93,7 +90,10 @@ export default function Dashboard() {
               {dog.breed || "mystery breed"} · energy: {dog.energy_level}
             </p>
             <p className="mt-1 max-w-xl text-xs text-zinc-500">{dog.bio}</p>
-            <a href="/onboarding" className="mt-2 inline-block text-xs text-amber-500 hover:underline">
+            <a
+              href="/onboarding"
+              className="mt-2 inline-block text-xs text-amber-500 hover:underline"
+            >
               Edit profile
             </a>
           </div>
@@ -102,7 +102,9 @@ export default function Dashboard() {
       <section className="rounded-xl border border-zinc-800 bg-gradient-to-br from-zinc-900 to-zinc-950 p-8">
         <h2 className="text-3xl font-bold text-white">benny-the-dog-mcp</h2>
         <p className="mt-2 max-w-xl text-zinc-400">
-          Benny the dog health and care monitor - water bowls, movement, loneliness detection, sausage deliveries, projector movie time, wake calls. Boomy-robot patrol integration ready.
+          Benny the dog health and care monitor - water bowls, movement, loneliness detection,
+          sausage deliveries, projector movie time, wake calls. Boomy-robot patrol integration
+          ready.
         </p>
         <div className="mt-4 flex gap-2">
           <a
@@ -115,7 +117,12 @@ export default function Dashboard() {
       </section>
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Kpi testid="kpi-server" label="Server" value={health?.server ?? "..."} icon={Server} />
-        <Kpi testid="kpi-tools" label="Tools" value={String(health?.tool_count ?? "-")} icon={Wrench} />
+        <Kpi
+          testid="kpi-tools"
+          label="Tools"
+          value={String(health?.tool_count ?? "-")}
+          icon={Wrench}
+        />
         <Kpi testid="kpi-status" label="Status" value={health?.status ?? "..."} icon={Activity} />
         <Kpi testid="kpi-version" label="Version" value={health?.version ?? "..."} icon={Cpu} />
       </section>

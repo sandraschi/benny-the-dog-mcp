@@ -42,7 +42,9 @@ export default function Logs() {
           className="ml-auto rounded border border-zinc-700 bg-zinc-800 px-2 py-1 text-sm text-zinc-100"
         >
           {["all", "INFO", "WARNING", "ERROR"].map((l) => (
-            <option key={l} value={l}>{l}</option>
+            <option key={l} value={l}>
+              {l}
+            </option>
           ))}
         </select>
       </div>

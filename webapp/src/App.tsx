@@ -1,18 +1,18 @@
-import { Routes, Route } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import Layout from "./Layout";
-import Dashboard from "./pages/Dashboard";
-import Tools from "./pages/Tools";
-import Skills from "./pages/Skills";
-import Chat from "./pages/Chat";
-import Settings from "./pages/Settings";
-import Help from "./pages/Help";
-import Logs from "./pages/Logs";
 import ApiDocs from "./pages/ApiDocs";
-import Jobs from "./pages/Jobs";
-import Members from "./pages/Members";
-import Shop from "./pages/Shop";
 import Cart from "./pages/Cart";
+import Chat from "./pages/Chat";
+import Dashboard from "./pages/Dashboard";
+import Help from "./pages/Help";
+import Jobs from "./pages/Jobs";
+import Logs from "./pages/Logs";
+import Members from "./pages/Members";
 import Onboarding from "./pages/Onboarding";
+import Settings from "./pages/Settings";
+import Shop from "./pages/Shop";
+import Skills from "./pages/Skills";
+import Tools from "./pages/Tools";
 
 export default function App() {
   return (

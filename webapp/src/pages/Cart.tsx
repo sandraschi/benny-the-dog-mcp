@@ -1,5 +1,5 @@
+import { CheckCircle2, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { Trash2, CheckCircle2 } from "lucide-react";
 import { API_BASE } from "../lib/api";
 import { useCart } from "../store/cart";
 
@@ -34,14 +34,21 @@ export default function Cart() {
     <div data-testid="cart-page" className="max-w-2xl space-y-4">
       <h2 className="text-xl font-semibold text-white">Cart</h2>
       {items.map((i) => (
-        <div key={i.id} className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-900 p-3">
+        <div
+          key={i.id}
+          className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-900 p-3"
+        >
           <div>
             <div className="text-sm text-zinc-200">{i.name}</div>
             <div className="text-xs text-zinc-500">
               qty {i.qty} x {(i.price_cents / 100).toFixed(2)} EUR
             </div>
           </div>
-          <button onClick={() => remove(i.id)} className="text-zinc-600 hover:text-red-400" title="Remove">
+          <button
+            onClick={() => remove(i.id)}
+            className="text-zinc-600 hover:text-red-400"
+            title="Remove"
+          >
             <Trash2 size={14} />
           </button>
         </div>

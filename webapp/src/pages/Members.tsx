@@ -1,5 +1,5 @@
+import { Trash2, UserPlus } from "lucide-react";
 import { useEffect, useState } from "react";
-import { UserPlus, Trash2 } from "lucide-react";
 import { API_BASE } from "../lib/api";
 
 interface Member {
@@ -78,7 +78,7 @@ export default function Members() {
             <th className="pb-2">Email</th>
             <th className="pb-2">Role</th>
             <th className="pb-2">Joined</th>
-            <th className="pb-2"></th>
+            <th className="pb-2" />
           </tr>
         </thead>
         <tbody>

@@ -1,0 +1,33 @@
+{
+  "manifest_version": "0.2",
+  "name": "benny-the-dog-mcp",
+  "version": "0.1.0",
+  "description": "Benny the dog health and care monitor - water bowls, movement, loneliness detection, sausage deliveries, projector movie time, wake calls. Boomy-robot patrol integration ready.",
+  "author": { "name": "Sandra Schipal" },
+  "server": {
+    "type": "python",
+    "entry_point": "src/benny_the_dog_mcp/server.py",
+    "mcp_config": {
+      "command": "uv",
+      "args": ["run", "python", "-m", "benny_the_dog_mcp.server"],
+      "env": {
+        "PYTHONPATH": "${PWD}",
+        "PYTHONUNBUFFERED": "1"
+      }
+    }
+  },
+  "tools": [
+    {
+      "name": "dog_ops",
+      "description": "Benny care operations - status, water_refill, bark_event, movement, sausage_delivery, movie_time, wake"
+    },
+    {
+      "name": "app_info",
+      "description": "Server metadata: name, version, tool count"
+    },
+    {
+      "name": "server_shutdown",
+      "description": "Gracefully shut down the server (requires confirm=True)"
+    }
+  ]
+}

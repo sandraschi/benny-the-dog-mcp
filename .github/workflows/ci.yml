@@ -12,6 +12,8 @@ jobs:
       - uses: astral-sh/setup-uv@v6
       - run: uv sync --group dev
       - run: uv run ruff check .
+      - run: uv run ruff format . --check
+      - run: uv run pyright src/
       - run: uv run pytest tests/ -q
 
   frontend:
@@ -22,6 +24,8 @@ jobs:
       - run: bun install
         working-directory: webapp
       - run: bunx tsc --noEmit
+        working-directory: webapp
+      - run: bunx biome ci src/
         working-directory: webapp
       - run: bun run build
         working-directory: webapp

@@ -1,22 +1,22 @@
-import { useEffect, useState } from "react";
-import { Link, Outlet } from "react-router-dom";
 import {
-  LayoutDashboard,
-  Wrench,
   BookOpen,
-  MessageSquare,
   CalendarClock,
-  Terminal,
-  Code2,
-  Users,
-  Store,
-  ShoppingCart,
-  Rocket,
-  Settings as SettingsIcon,
-  HelpCircle,
   ChevronLeft,
   ChevronRight,
+  Code2,
+  HelpCircle,
+  LayoutDashboard,
+  MessageSquare,
+  Rocket,
+  Settings as SettingsIcon,
+  ShoppingCart,
+  Store,
+  Terminal,
+  Users,
+  Wrench,
 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link, Outlet } from "react-router-dom";
 import { fetchHealth } from "./lib/api";
 
 const NAV = [
@@ -41,19 +41,24 @@ export default function Layout() {
 
   useEffect(() => {
     let cancelled = false;
+    let delay = 1000;
+    const MAX_DELAY = 16000;
     const poll = async () => {
       try {
         await fetchHealth();
         if (!cancelled) setBackendOk(true);
+        delay = 1000;
       } catch {
         if (!cancelled) setBackendOk(false);
+        delay = Math.min(delay * 2, MAX_DELAY);
       }
+      if (!cancelled) timer = setTimeout(poll, delay);
     };
+    let timer: ReturnType<typeof setTimeout>;
     poll();
-    const interval = setInterval(poll, 10_000);
     return () => {
       cancelled = true;
-      clearInterval(interval);
+      clearTimeout(timer);
     };
   }, []);
 
@@ -103,11 +108,7 @@ export default function Layout() {
             <span
               data-testid="backend-dot"
               className={`h-2 w-2 rounded-full ${
-                backendOk === null
-                  ? "bg-zinc-500"
-                  : backendOk
-                    ? "bg-green-500"
-                    : "bg-red-500"
+                backendOk === null ? "bg-zinc-500" : backendOk ? "bg-green-500" : "bg-red-500"
               } animate-pulse`}
             />
             <span className="text-xs text-zinc-400">

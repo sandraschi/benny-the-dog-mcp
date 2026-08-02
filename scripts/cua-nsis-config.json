@@ -1,0 +1,32 @@
+{
+    "product_name": "benny-the-dog-mcp",
+    "install_dir": "%LOCALAPPDATA%\\benny-the-dog-mcp",
+    "operator_exe": "benny-the-dog-mcp-native.exe",
+    "backend_process_names": ["benny-the-dog-mcp-native", "benny-the-dog-mcp-backend"],
+    "backend_port": 11142,
+    "frontend_port": 11143,
+    "health_path": "/api/health",
+    "diagnostics_path": "/api/v1/diagnostics",
+    "feature_smoke_path": "/api/capabilities",
+    "backend_module": "benny_the_dog_mcp.server:app",
+    "window_title_re": "benny-the-dog-mcp",
+    "nsis_glob": "native/target/release/bundle/nsis/benny-the-dog-mcp_*_x64-setup.exe",
+    "bridge_ok_text": "REST bridge reachable",
+    "connected_badge_text": "connected",
+    "connected_timeout": 60,
+    "nav_routes": [
+        ["Dashboard", "benny-the-dog-mcp"],
+        ["Tools", "Tools"],
+        ["Skills", "Skills"],
+        ["Chat", "Chat"],
+        ["Members", "Members"],
+        ["Shop", "Shop"],
+        ["Cart", "Cart"],
+        ["Jobs", "Jobs"],
+        ["Logs", "Logs"],
+        ["Onboarding", "Onboarding"],
+        ["Settings", "Settings"],
+        ["Help", "Help"]
+    ],
+    "uninstall_registry_filter": "*benny-the-dog-mcp*"
+}

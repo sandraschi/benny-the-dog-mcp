@@ -15,13 +15,20 @@ export default function ApiDocs() {
         </a>
       </div>
       <div className="flex flex-wrap gap-2 text-xs">
-        {["GET /api/health", "GET /api/v1/diagnostics", "GET /api/tools", "GET /api/skills", "GET /api/logs", "GET /api/jobs", "POST /api/jobs/{id}/run", "/mcp"].map(
-          (ep) => (
-            <span key={ep} className="rounded bg-zinc-900 px-2 py-1 font-mono text-amber-500">
-              {ep}
-            </span>
-          ),
-        )}
+        {[
+          "GET /api/health",
+          "GET /api/v1/diagnostics",
+          "GET /api/tools",
+          "GET /api/skills",
+          "GET /api/logs",
+          "GET /api/jobs",
+          "POST /api/jobs/{id}/run",
+          "/mcp",
+        ].map((ep) => (
+          <span key={ep} className="rounded bg-zinc-900 px-2 py-1 font-mono text-amber-500">
+            {ep}
+          </span>
+        ))}
       </div>
       <iframe
         src={`${API_BASE}/docs`}

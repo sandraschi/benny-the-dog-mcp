@@ -1,0 +1,28 @@
+# benny-the-dog-mcp - Cursor rules
+
+Benny the dog health and care monitor. FastMCP 3.4 backend (Python, uv), React + Vite + Tailwind frontend (Bun).
+
+## Development
+
+- Backend: `uv run uvicorn benny_the_dog_mcp.server:app --host 127.0.0.1 --port 11142`
+- Frontend: `bun --prefix webapp run dev` (port 11143)
+- Full stack: `.\start.ps1` (clears ports, starts both, opens browser)
+- Tests: `uv run pytest tests/` (backend), `bun --prefix webapp run e2e` (Playwright)
+- Lint: `uv run ruff check .` + `bunx biome check webapp/src/`
+- Typecheck: `uv run pyright src/` + `bunx tsc --noEmit` (in webapp/)
+
+## Ports
+
+Backend 11142, frontend 11143. Registered in the fleet reservoir — do not change.
+
+## Session Context (Benny the Dog MCP)
+
+You have access to a dog health and care monitor: water bowl refills, movement detection, bark/loneliness flags, sausage deliveries, projector movie time, and wake calls. State persists in SQLite.
+
+**Before starting work:**
+1. Check Benny's current state: dog_ops(operation="status")
+2. Read the skill for care protocol: skill://benny_the_dog_mcp/SKILL.md
+
+**At end of work:**
+- Log any care events you performed (dog_ops water_refill / bark_event / movement / sausage_delivery)
+- Keep the dog profile up to date via the webapp onboarding

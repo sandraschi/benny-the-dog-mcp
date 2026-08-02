@@ -11,6 +11,8 @@ body {
   font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
 }
 
-select, input, textarea {
+select,
+input,
+textarea {
   color-scheme: dark;
 }

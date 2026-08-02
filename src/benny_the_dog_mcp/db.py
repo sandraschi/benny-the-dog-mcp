@@ -113,9 +113,7 @@ def add_member(name: str, email: str, role: str = "member") -> dict:
             "INSERT INTO members (name, email, role) VALUES (?, ?, ?)",
             (name, email, role),
         )
-        row = conn.execute(
-            "SELECT * FROM members WHERE id = ?", (cur.lastrowid,)
-        ).fetchone()
+        row = conn.execute("SELECT * FROM members WHERE id = ?", (cur.lastrowid,)).fetchone()
     return dict(row)
 
 
@@ -137,10 +135,9 @@ def create_order(items: str, total_cents: int) -> dict:
             "INSERT INTO orders (items, total_cents) VALUES (?, ?)",
             (items, total_cents),
         )
-        row = conn.execute(
-            "SELECT * FROM orders WHERE id = ?", (cur.lastrowid,)
-        ).fetchone()
+        row = conn.execute("SELECT * FROM orders WHERE id = ?", (cur.lastrowid,)).fetchone()
     return dict(row)
+
 
 def log_dog_event(event_type: str, payload: dict | None = None) -> dict:
     """Append a Benny event (water, bark, movement, sausage, movie, wake)."""
@@ -151,9 +148,7 @@ def log_dog_event(event_type: str, payload: dict | None = None) -> dict:
             "INSERT INTO dog_events (event_type, payload) VALUES (?, ?)",
             (event_type, json.dumps(payload or {})),
         )
-        row = conn.execute(
-            "SELECT * FROM dog_events WHERE id = ?", (cur.lastrowid,)
-        ).fetchone()
+        row = conn.execute("SELECT * FROM dog_events WHERE id = ?", (cur.lastrowid,)).fetchone()
     return dict(row)
 
 
@@ -189,18 +184,65 @@ def get_dog_profile() -> dict | None:
 
 def save_dog_profile(p: dict) -> dict:
     fields = [
-        "name", "breed", "age_years", "weight_kg", "bio", "vet_name",
-        "vet_phone", "allergies", "medications", "last_checkup", "conditions",
-        "energy_level", "temperament", "barkiness", "socialization", "fears",
-        "walk_times", "walk_duration_min", "walk_route", "onboarded",
+        "name",
+        "breed",
+        "age_years",
+        "weight_kg",
+        "bio",
+        "vet_name",
+        "vet_phone",
+        "allergies",
+        "medications",
+        "last_checkup",
+        "conditions",
+        "energy_level",
+        "temperament",
+        "barkiness",
+        "socialization",
+        "fears",
+        "walk_times",
+        "walk_duration_min",
+        "walk_route",
+        "onboarded",
     ]
     with _conn() as conn:
         conn.execute(
-            "INSERT INTO dog_profile (id, " + ", ".join(fields) + ") VALUES (1, " +
-            ", ".join(["?"] * len(fields)) + ") " +
-            "ON CONFLICT(id) DO UPDATE SET " +
-            ", ".join([f"{f} = excluded.{f}" for f in fields]),
-            tuple(p.get(f, "" if f in ("name", "breed", "bio", "vet_name", "vet_phone", "allergies", "medications", "last_checkup", "conditions", "energy_level", "temperament", "barkiness", "socialization", "fears", "walk_times", "walk_route") else 0 if f in ("age_years", "weight_kg", "walk_duration_min") else 1) for f in fields),
+            "INSERT INTO dog_profile (id, "
+            + ", ".join(fields)
+            + ") VALUES (1, "
+            + ", ".join(["?"] * len(fields))
+            + ") "
+            + "ON CONFLICT(id) DO UPDATE SET "
+            + ", ".join([f"{f} = excluded.{f}" for f in fields]),
+            tuple(
+                p.get(
+                    f,
+                    ""
+                    if f
+                    in (
+                        "name",
+                        "breed",
+                        "bio",
+                        "vet_name",
+                        "vet_phone",
+                        "allergies",
+                        "medications",
+                        "last_checkup",
+                        "conditions",
+                        "energy_level",
+                        "temperament",
+                        "barkiness",
+                        "socialization",
+                        "fears",
+                        "walk_times",
+                        "walk_route",
+                    )
+                    else 0
+                    if f in ("age_years", "weight_kg", "walk_duration_min")
+                    else 1,
+                )
+                for f in fields
+            ),
         )
         row = conn.execute("SELECT * FROM dog_profile WHERE id = 1").fetchone()
     return dict(row)
@@ -212,13 +254,17 @@ def add_dog_pic(name: str, mime: str, data_base64: str) -> dict:
             "INSERT INTO dog_pics (name, mime, data_base64) VALUES (?, ?, ?)",
             (name, mime, data_base64),
         )
-        row = conn.execute("SELECT id, name, mime FROM dog_pics WHERE id = ?", (cur.lastrowid,)).fetchone()
+        row = conn.execute(
+            "SELECT id, name, mime FROM dog_pics WHERE id = ?", (cur.lastrowid,)
+        ).fetchone()
     return dict(row)
 
 
 def list_dog_pics() -> list[dict]:
     with _conn() as conn:
-        rows = conn.execute("SELECT id, name, mime, data_base64 FROM dog_pics ORDER BY id").fetchall()
+        rows = conn.execute(
+            "SELECT id, name, mime, data_base64 FROM dog_pics ORDER BY id"
+        ).fetchall()
     return [dict(r) for r in rows]
 
 

@@ -1,0 +1,1097 @@
+[
+  {
+    "name": "status-basic",
+    "description": "Check Benny's current state",
+    "prompt": "How is Benny doing?",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "status"
+    }
+  },
+  {
+    "name": "status-after-bark",
+    "description": "Check state after a reported bark",
+    "prompt": "Benny barked a lot, check on him",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "status",
+      "detail": "after sustained barking"
+    }
+  },
+  {
+    "name": "status-morning",
+    "description": "Morning wellbeing check",
+    "prompt": "Good morning, how did the night go?",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "status"
+    }
+  },
+  {
+    "name": "status-evening",
+    "description": "Evening wellbeing check",
+    "prompt": "How was his day?",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "status"
+    }
+  },
+  {
+    "name": "status-water",
+    "description": "Check water refill history",
+    "prompt": "When was his water last topped up?",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "status"
+    }
+  },
+  {
+    "name": "status-movement",
+    "description": "Check movement history",
+    "prompt": "Has he moved recently?",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "status"
+    }
+  },
+  {
+    "name": "status-sausages",
+    "description": "Check sausage delivery count",
+    "prompt": "How many sausages has he had?",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "status"
+    }
+  },
+  {
+    "name": "status-loneliness",
+    "description": "Check loneliness flag",
+    "prompt": "Is Benny lonely?",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "status"
+    }
+  },
+  {
+    "name": "status-events",
+    "description": "Read recent care events",
+    "prompt": "What happened last night?",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "status"
+    }
+  },
+  {
+    "name": "status-profile-context",
+    "description": "Status with profile context",
+    "prompt": "Is he due for a walk?",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "status"
+    }
+  },
+  {
+    "name": "status-by-boomy",
+    "description": "Robot-initiated status read",
+    "prompt": "Boomy wants to know if he should act",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "status"
+    }
+  },
+  {
+    "name": "status-empty-diary",
+    "description": "Status on a fresh install",
+    "prompt": "We just installed, what does the diary show?",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "status"
+    }
+  },
+  {
+    "name": "water-1-water-morning",
+    "description": "Log water refill: bowl topped up, 2L",
+    "prompt": "Just topped up the bowl - bowl topped up, 2L",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "water_refill",
+      "detail": "bowl topped up, 2L",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "water-2-water-after-walk",
+    "description": "Log water refill: post-walk refill, 1.5L",
+    "prompt": "Just topped up the bowl - post-walk refill, 1.5L",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "water_refill",
+      "detail": "post-walk refill, 1.5L",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "water-3-water-evening",
+    "description": "Log water refill: evening top-up",
+    "prompt": "Just topped up the bowl - evening top-up",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "water_refill",
+      "detail": "evening top-up",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "water-4-water-boomy",
+    "description": "Log water refill: robot refill attempt",
+    "prompt": "Just topped up the bowl - robot refill attempt",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "water_refill",
+      "detail": "robot refill attempt",
+      "actor": "boomy"
+    }
+  },
+  {
+    "name": "water-5-water-sensor",
+    "description": "Log water refill: sensor detected low level, human refilled",
+    "prompt": "Just topped up the bowl - sensor detected low level, human refilled",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "water_refill",
+      "detail": "sensor detected low level, human refilled",
+      "actor": "sensor"
+    }
+  },
+  {
+    "name": "water-6-water-hot-day",
+    "description": "Log water refill: extra refill on hot day",
+    "prompt": "Just topped up the bowl - extra refill on hot day",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "water_refill",
+      "detail": "extra refill on hot day",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "water-7-water-with-notes",
+    "description": "Log water refill: refill with cleaning note",
+    "prompt": "Just topped up the bowl - refill with cleaning note",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "water_refill",
+      "detail": "refill with cleaning note",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "water-8-water-midday",
+    "description": "Log water refill: midday top-up",
+    "prompt": "Just topped up the bowl - midday top-up",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "water_refill",
+      "detail": "midday top-up",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "water-9-water-overnight",
+    "description": "Log water refill: overnight refill check",
+    "prompt": "Just topped up the bowl - overnight refill check",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "water_refill",
+      "detail": "overnight refill check",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "water-10-water-no-detail",
+    "description": "Log water refill: bare refill log",
+    "prompt": "Just topped up the bowl - bare refill log",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "water_refill",
+      "detail": "bare refill log",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "water-11-water-2l",
+    "description": "Log water refill: refill with exact amount",
+    "prompt": "Just topped up the bowl - refill with exact amount",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "water_refill",
+      "detail": "refill with exact amount",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "water-12-water-bowl-cleaned",
+    "description": "Log water refill: refill plus bowl wash",
+    "prompt": "Just topped up the bowl - refill plus bowl wash",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "water_refill",
+      "detail": "refill plus bowl wash",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "water-13-water-after-sausage",
+    "description": "Log water refill: water after a treat",
+    "prompt": "Just topped up the bowl - water after a treat",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "water_refill",
+      "detail": "water after a treat",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "water-14-water-before-walk",
+    "description": "Log water refill: pre-walk refill",
+    "prompt": "Just topped up the bowl - pre-walk refill",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "water_refill",
+      "detail": "pre-walk refill",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "bark-1-bark-short",
+    "description": "Log bark event: brief barking",
+    "prompt": "Benny is barking - brief barking",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "bark_event",
+      "detail": "brief barking",
+      "actor": "sensor"
+    }
+  },
+  {
+    "name": "bark-2-bark-sustained",
+    "description": "Log bark event: sustained barking, 10 minutes",
+    "prompt": "Benny is barking - sustained barking, 10 minutes",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "bark_event",
+      "detail": "sustained barking, 10 minutes",
+      "actor": "sensor"
+    }
+  },
+  {
+    "name": "bark-3-bark-night",
+    "description": "Log bark event: barking at 2am",
+    "prompt": "Benny is barking - barking at 2am",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "bark_event",
+      "detail": "barking at 2am",
+      "actor": "sensor"
+    }
+  },
+  {
+    "name": "bark-4-bark-mailman",
+    "description": "Log bark event: barking at the mailman",
+    "prompt": "Benny is barking - barking at the mailman",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "bark_event",
+      "detail": "barking at the mailman",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "bark-5-bark-thunder",
+    "description": "Log bark event: barking during thunder",
+    "prompt": "Benny is barking - barking during thunder",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "bark_event",
+      "detail": "barking during thunder",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "bark-6-bark-vacuum",
+    "description": "Log bark event: barking at the vacuum",
+    "prompt": "Benny is barking - barking at the vacuum",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "bark_event",
+      "detail": "barking at the vacuum",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "bark-7-bark-lonely",
+    "description": "Log bark event: barking with no movement after",
+    "prompt": "Benny is barking - barking with no movement after",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "bark_event",
+      "detail": "barking with no movement after",
+      "actor": "sensor"
+    }
+  },
+  {
+    "name": "bark-8-bark-boomy",
+    "description": "Log bark event: robot detected barking",
+    "prompt": "Benny is barking - robot detected barking",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "bark_event",
+      "detail": "robot detected barking",
+      "actor": "boomy"
+    }
+  },
+  {
+    "name": "bark-9-bark-human-observed",
+    "description": "Log bark event: human observed barking",
+    "prompt": "Benny is barking - human observed barking",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "bark_event",
+      "detail": "human observed barking",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "bark-10-bark-dinner-time",
+    "description": "Log bark event: barking at dinner time",
+    "prompt": "Benny is barking - barking at dinner time",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "bark_event",
+      "detail": "barking at dinner time",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "bark-11-bark-door",
+    "description": "Log bark event: barking at the door",
+    "prompt": "Benny is barking - barking at the door",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "bark_event",
+      "detail": "barking at the door",
+      "actor": "sensor"
+    }
+  },
+  {
+    "name": "bark-12-bark-attention",
+    "description": "Log bark event: attention seeking barks",
+    "prompt": "Benny is barking - attention seeking barks",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "bark_event",
+      "detail": "attention seeking barks",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "bark-13-bark-group",
+    "description": "Log bark event: multiple barks logged",
+    "prompt": "Benny is barking - multiple barks logged",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "bark_event",
+      "detail": "multiple barks logged",
+      "actor": "sensor"
+    }
+  },
+  {
+    "name": "bark-14-bark-calm-after",
+    "description": "Log bark event: brief bark then calm",
+    "prompt": "Benny is barking - brief bark then calm",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "bark_event",
+      "detail": "brief bark then calm",
+      "actor": "sensor"
+    }
+  },
+  {
+    "name": "move-1-move-living-room",
+    "description": "Log movement: camera: motion in living room",
+    "prompt": "Movement detected - camera: motion in living room",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "movement",
+      "detail": "camera: motion in living room",
+      "actor": "boomy"
+    }
+  },
+  {
+    "name": "move-2-move-bedroom",
+    "description": "Log movement: camera: motion in bedroom",
+    "prompt": "Movement detected - camera: motion in bedroom",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "movement",
+      "detail": "camera: motion in bedroom",
+      "actor": "boomy"
+    }
+  },
+  {
+    "name": "move-3-move-kitchen",
+    "description": "Log movement: camera: motion near water bowl",
+    "prompt": "Movement detected - camera: motion near water bowl",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "movement",
+      "detail": "camera: motion near water bowl",
+      "actor": "boomy"
+    }
+  },
+  {
+    "name": "move-4-move-walk",
+    "description": "Log movement: walk completed, 30 min",
+    "prompt": "Movement detected - walk completed, 30 min",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "movement",
+      "detail": "walk completed, 30 min",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "move-5-move-yard",
+    "description": "Log movement: yard patrol",
+    "prompt": "Movement detected - yard patrol",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "movement",
+      "detail": "yard patrol",
+      "actor": "sensor"
+    }
+  },
+  {
+    "name": "move-6-move-play",
+    "description": "Log movement: play session observed",
+    "prompt": "Movement detected - play session observed",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "movement",
+      "detail": "play session observed",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "move-7-move-stretch",
+    "description": "Log movement: stretch detected",
+    "prompt": "Movement detected - stretch detected",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "movement",
+      "detail": "stretch detected",
+      "actor": "sensor"
+    }
+  },
+  {
+    "name": "move-8-move-zoomies",
+    "description": "Log movement: zoomies detected",
+    "prompt": "Movement detected - zoomies detected",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "movement",
+      "detail": "zoomies detected",
+      "actor": "boomy"
+    }
+  },
+  {
+    "name": "move-9-move-sniff",
+    "description": "Log movement: slow sniffing pattern",
+    "prompt": "Movement detected - slow sniffing pattern",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "movement",
+      "detail": "slow sniffing pattern",
+      "actor": "sensor"
+    }
+  },
+  {
+    "name": "move-10-move-run",
+    "description": "Log movement: running detected",
+    "prompt": "Movement detected - running detected",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "movement",
+      "detail": "running detected",
+      "actor": "sensor"
+    }
+  },
+  {
+    "name": "move-11-move-after-wake",
+    "description": "Log movement: movement after wake call",
+    "prompt": "Movement detected - movement after wake call",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "movement",
+      "detail": "movement after wake call",
+      "actor": "sensor"
+    }
+  },
+  {
+    "name": "move-12-move-pre-walk",
+    "description": "Log movement: movement before walk time",
+    "prompt": "Movement detected - movement before walk time",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "movement",
+      "detail": "movement before walk time",
+      "actor": "sensor"
+    }
+  },
+  {
+    "name": "move-13-move-dusk",
+    "description": "Log movement: dusk movement",
+    "prompt": "Movement detected - dusk movement",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "movement",
+      "detail": "dusk movement",
+      "actor": "sensor"
+    }
+  },
+  {
+    "name": "move-14-move-morning",
+    "description": "Log movement: morning movement",
+    "prompt": "Movement detected - morning movement",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "movement",
+      "detail": "morning movement",
+      "actor": "boomy"
+    }
+  },
+  {
+    "name": "move-15-move-human-confirm",
+    "description": "Log movement: human confirms movement",
+    "prompt": "Movement detected - human confirms movement",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "movement",
+      "detail": "human confirms movement",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "sausage-1-sausage-emergency",
+    "description": "Log sausage delivery: emergency sausage dropped",
+    "prompt": "Give Benny a sausage - emergency sausage dropped",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "sausage_delivery",
+      "detail": "emergency sausage dropped",
+      "actor": "boomy"
+    }
+  },
+  {
+    "name": "sausage-2-sausage-human",
+    "description": "Log sausage delivery: human gave a sausage",
+    "prompt": "Give Benny a sausage - human gave a sausage",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "sausage_delivery",
+      "detail": "human gave a sausage",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "sausage-3-sausage-treat",
+    "description": "Log sausage delivery: treat after walk",
+    "prompt": "Give Benny a sausage - treat after walk",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "sausage_delivery",
+      "detail": "treat after walk",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "sausage-4-sausage-lonely",
+    "description": "Log sausage delivery: sausage to break loneliness cycle",
+    "prompt": "Give Benny a sausage - sausage to break loneliness cycle",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "sausage_delivery",
+      "detail": "sausage to break loneliness cycle",
+      "actor": "boomy"
+    }
+  },
+  {
+    "name": "sausage-5-sausage-training",
+    "description": "Log sausage delivery: training reward",
+    "prompt": "Give Benny a sausage - training reward",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "sausage_delivery",
+      "detail": "training reward",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "sausage-6-sausage-kitchen",
+    "description": "Log sausage delivery: delivered at kitchen door",
+    "prompt": "Give Benny a sausage - delivered at kitchen door",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "sausage_delivery",
+      "detail": "delivered at kitchen door",
+      "actor": "boomy"
+    }
+  },
+  {
+    "name": "sausage-7-sausage-small",
+    "description": "Log sausage delivery: half sausage",
+    "prompt": "Give Benny a sausage - half sausage",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "sausage_delivery",
+      "detail": "half sausage",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "sausage-8-sausage-requested",
+    "description": "Log sausage delivery: robot requested delivery",
+    "prompt": "Give Benny a sausage - robot requested delivery",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "sausage_delivery",
+      "detail": "robot requested delivery",
+      "actor": "boomy"
+    }
+  },
+  {
+    "name": "sausage-9-sausage-rare",
+    "description": "Log sausage delivery: rare treat day",
+    "prompt": "Give Benny a sausage - rare treat day",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "sausage_delivery",
+      "detail": "rare treat day",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "sausage-10-sausage-after-bark",
+    "description": "Log sausage delivery: delivery after barking episode",
+    "prompt": "Give Benny a sausage - delivery after barking episode",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "sausage_delivery",
+      "detail": "delivery after barking episode",
+      "actor": "boomy"
+    }
+  },
+  {
+    "name": "sausage-11-sausage-morning",
+    "description": "Log sausage delivery: morning treat",
+    "prompt": "Give Benny a sausage - morning treat",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "sausage_delivery",
+      "detail": "morning treat",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "sausage-12-sausage-no-detail",
+    "description": "Log sausage delivery: bare delivery log",
+    "prompt": "Give Benny a sausage - bare delivery log",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "sausage_delivery",
+      "detail": "bare delivery log",
+      "actor": "boomy"
+    }
+  },
+  {
+    "name": "sausage-13-sausage-rainy",
+    "description": "Log sausage delivery: delivery on rainy day",
+    "prompt": "Give Benny a sausage - delivery on rainy day",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "sausage_delivery",
+      "detail": "delivery on rainy day",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "sausage-14-sausage-guest",
+    "description": "Log sausage delivery: guest gave a treat",
+    "prompt": "Give Benny a sausage - guest gave a treat",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "sausage_delivery",
+      "detail": "guest gave a treat",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "movie-1-movie-whitefang",
+    "description": "Log projector movie: White Fang",
+    "prompt": "Put on a movie for Benny - White Fang",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "movie_time",
+      "detail": "White Fang",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "movie-2-movie-lad",
+    "description": "Log projector movie: Lassie rerun",
+    "prompt": "Put on a movie for Benny - Lassie rerun",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "movie_time",
+      "detail": "Lassie rerun",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "movie-3-movie-homeward",
+    "description": "Log projector movie: Homeward Bound",
+    "prompt": "Put on a movie for Benny - Homeward Bound",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "movie_time",
+      "detail": "Homeward Bound",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "movie-4-movie-evening",
+    "description": "Log projector movie: evening wind-down movie",
+    "prompt": "Put on a movie for Benny - evening wind-down movie",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "movie_time",
+      "detail": "evening wind-down movie",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "movie-5-movie-rainy",
+    "description": "Log projector movie: rainy day movie",
+    "prompt": "Put on a movie for Benny - rainy day movie",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "movie_time",
+      "detail": "rainy day movie",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "movie-6-movie-after-walk",
+    "description": "Log projector movie: post-walk movie",
+    "prompt": "Put on a movie for Benny - post-walk movie",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "movie_time",
+      "detail": "post-walk movie",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "movie-7-movie-calm",
+    "description": "Log projector movie: calming nature film",
+    "prompt": "Put on a movie for Benny - calming nature film",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "movie_time",
+      "detail": "calming nature film",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "movie-8-movie-default",
+    "description": "Log projector movie: no title given",
+    "prompt": "Put on a movie for Benny - no title given",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "movie_time",
+      "detail": "no title given",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "wake-1-wake-gentle",
+    "description": "Log wake call: gentle chime",
+    "prompt": "Wake Benny up - gentle chime",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "wake",
+      "detail": "gentle chime",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "wake-2-wake-morning",
+    "description": "Log wake call: morning wake call",
+    "prompt": "Wake Benny up - morning wake call",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "wake",
+      "detail": "morning wake call",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "wake-3-wake-walk-time",
+    "description": "Log wake call: wake for scheduled walk",
+    "prompt": "Wake Benny up - wake for scheduled walk",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "wake",
+      "detail": "wake for scheduled walk",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "wake-4-wake-boomy",
+    "description": "Log wake call: robot wake call",
+    "prompt": "Wake Benny up - robot wake call",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "wake",
+      "detail": "robot wake call",
+      "actor": "boomy"
+    }
+  },
+  {
+    "name": "wake-5-wake-long-nap",
+    "description": "Log wake call: wake after long nap",
+    "prompt": "Wake Benny up - wake after long nap",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "wake",
+      "detail": "wake after long nap",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "wake-6-wake-dinner",
+    "description": "Log wake call: wake for dinner",
+    "prompt": "Wake Benny up - wake for dinner",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "wake",
+      "detail": "wake for dinner",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "wake-7-wake-soft",
+    "description": "Log wake call: soft whistle",
+    "prompt": "Wake Benny up - soft whistle",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "wake",
+      "detail": "soft whistle",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "wake-8-wake-cue",
+    "description": "Log wake call: favorite sound cue",
+    "prompt": "Wake Benny up - favorite sound cue",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "wake",
+      "detail": "favorite sound cue",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "wake-9-wake-afternoon",
+    "description": "Log wake call: afternoon wake",
+    "prompt": "Wake Benny up - afternoon wake",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "wake",
+      "detail": "afternoon wake",
+      "actor": "sensor"
+    }
+  },
+  {
+    "name": "wake-10-wake-no-detail",
+    "description": "Log wake call: bare wake log",
+    "prompt": "Wake Benny up - bare wake log",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "wake",
+      "detail": "bare wake log",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "info-basic",
+    "description": "Server metadata",
+    "prompt": "What server is this?",
+    "tool": "app_info",
+    "arguments": {}
+  },
+  {
+    "name": "info-version",
+    "description": "Check version",
+    "prompt": "What version are you?",
+    "tool": "app_info",
+    "arguments": {}
+  },
+  {
+    "name": "info-tools",
+    "description": "Check tool count",
+    "prompt": "How many tools do you have?",
+    "tool": "app_info",
+    "arguments": {}
+  },
+  {
+    "name": "shutdown-no-confirm",
+    "description": "Shutdown without confirmation (should refuse)",
+    "prompt": "Shut down the server",
+    "tool": "server_shutdown",
+    "arguments": {
+      "confirm": false
+    }
+  },
+  {
+    "name": "shutdown-confirm",
+    "description": "Confirmed shutdown",
+    "prompt": "Please stop the server, I am done",
+    "tool": "server_shutdown",
+    "arguments": {
+      "confirm": true
+    }
+  },
+  {
+    "name": "shutdown-missing-arg",
+    "description": "Shutdown with no arguments",
+    "prompt": "Stop the server",
+    "tool": "server_shutdown",
+    "arguments": {}
+  },
+  {
+    "name": "workflow-bark-then-status",
+    "description": "Log a bark then check status",
+    "prompt": "Benny barked for 10 minutes, check on him",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "bark_event",
+      "detail": "10 min barking",
+      "actor": "sensor"
+    }
+  },
+  {
+    "name": "workflow-status-then-sausage",
+    "description": "Check status then deliver sausage",
+    "prompt": "He seems lonely, give him a sausage",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "sausage_delivery",
+      "actor": "boomy",
+      "detail": "loneliness response"
+    }
+  },
+  {
+    "name": "workflow-morning-full",
+    "description": "Full morning routine",
+    "prompt": "Morning check: water, status, next walk",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "status"
+    }
+  },
+  {
+    "name": "workflow-night-report",
+    "description": "Night report",
+    "prompt": "Summarize last night's events",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "status"
+    }
+  },
+  {
+    "name": "status-today",
+    "description": "Today's activity summary",
+    "prompt": "What has Benny done today?",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "status"
+    }
+  },
+  {
+    "name": "water-night",
+    "description": "Night water refill",
+    "prompt": "Top up his water before bed",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "water_refill",
+      "detail": "bedtime refill",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "bark-quiet",
+    "description": "Single quiet bark",
+    "prompt": "He barked once at something outside",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "bark_event",
+      "detail": "single bark at window",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "move-slow",
+    "description": "Slow movement detected",
+    "prompt": "Sensors show slow movement in the hallway",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "movement",
+      "detail": "slow movement, hallway",
+      "actor": "sensor"
+    }
+  },
+  {
+    "name": "sausage-guest-extra",
+    "description": "Guest treat",
+    "prompt": "A guest gave him a treat",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "sausage_delivery",
+      "detail": "guest treat",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "movie-night-extra",
+    "description": "Night movie",
+    "prompt": "Wind down movie for the night",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "movie_time",
+      "detail": "evening nature film",
+      "actor": "human"
+    }
+  },
+  {
+    "name": "wake-extra",
+    "description": "Extra wake call",
+    "prompt": "Give him a wake call, he needs a walk",
+    "tool": "dog_ops",
+    "arguments": {
+      "operation": "wake",
+      "detail": "walk reminder cue",
+      "actor": "human"
+    }
+  }
+]

@@ -1,8 +1,8 @@
+import { ArrowLeft, ArrowRight, CheckCircle2, Plus, Trash2, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { ArrowRight, ArrowLeft, CheckCircle2, Plus, Trash2, Upload } from "lucide-react";
 import { API_BASE } from "../lib/api";
 
-const ONBOARDED_KEY = "__APPNAME__-onboarded";
+const ONBOARDED_KEY = "benny-the-dog-mcp-onboarded";
 
 interface Profile {
   name: string;
@@ -66,14 +66,7 @@ const EMPTY: Profile = {
   onboarded: 0,
 };
 
-const STEPS = [
-  "Bio",
-  "Photos",
-  "Vet & health",
-  "Behaviour",
-  "Walking",
-  "Dogparks & fountains",
-];
+const STEPS = ["Bio", "Photos", "Vet & health", "Behaviour", "Walking", "Dogparks & fountains"];
 
 export default function Onboarding() {
   const [step, setStep] = useState(0);
@@ -136,7 +129,12 @@ export default function Onboarding() {
     await fetch(`${API_BASE}/api/dog/tracks`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ track_type: trackType, name: name.trim(), lat: parseFloat(lat) || 0, lon: parseFloat(lon) || 0 }),
+      body: JSON.stringify({
+        track_type: trackType,
+        name: name.trim(),
+        lat: Number.parseFloat(lat) || 0,
+        lon: Number.parseFloat(lon) || 0,
+      }),
     });
     const j = await (await fetch(`${API_BASE}/api/dog/tracks`)).json();
     setTracks(j.tracks ?? []);
@@ -166,7 +164,7 @@ export default function Onboarding() {
     ).json();
     if (saved.success) {
       localStorage.setItem(ONBOARDED_KEY, "1");
-      localStorage.setItem("__APPNAME__-member", profile.name || "friend");
+      localStorage.setItem("benny-the-dog-mcp-member", profile.name || "friend");
       setDone(true);
     }
   };
@@ -202,7 +200,11 @@ export default function Onboarding() {
             key={s}
             onClick={() => setStep(i)}
             className={`rounded-full px-3 py-1 ${
-              i === step ? "bg-amber-500 text-zinc-950" : i < step ? "bg-green-900/50 text-green-400" : "bg-zinc-800 text-zinc-500"
+              i === step
+                ? "bg-amber-500 text-zinc-950"
+                : i < step
+                  ? "bg-green-900/50 text-green-400"
+                  : "bg-zinc-800 text-zinc-500"
             }`}
           >
             {i + 1}. {s}
@@ -216,36 +218,73 @@ export default function Onboarding() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <span className={label}>Name</span>
-              <input data-testid="dog-name" value={profile.name} onChange={(e) => set("name", e.target.value)} placeholder="Benny" className={input} />
+              <input
+                data-testid="dog-name"
+                value={profile.name}
+                onChange={(e) => set("name", e.target.value)}
+                placeholder="Benny"
+                className={input}
+              />
             </div>
             <div>
               <span className={label}>Breed</span>
-              <input value={profile.breed} onChange={(e) => set("breed", e.target.value)} placeholder="Mischling / Beagle mix" className={input} />
+              <input
+                value={profile.breed}
+                onChange={(e) => set("breed", e.target.value)}
+                placeholder="Mischling / Beagle mix"
+                className={input}
+              />
             </div>
             <div>
               <span className={label}>Age (years)</span>
-              <input type="number" value={profile.age_years || ""} onChange={(e) => set("age_years", parseFloat(e.target.value) || 0)} className={input} />
+              <input
+                type="number"
+                value={profile.age_years || ""}
+                onChange={(e) => set("age_years", Number.parseFloat(e.target.value) || 0)}
+                className={input}
+              />
             </div>
             <div>
               <span className={label}>Weight (kg)</span>
-              <input type="number" value={profile.weight_kg || ""} onChange={(e) => set("weight_kg", parseFloat(e.target.value) || 0)} className={input} />
+              <input
+                type="number"
+                value={profile.weight_kg || ""}
+                onChange={(e) => set("weight_kg", Number.parseFloat(e.target.value) || 0)}
+                className={input}
+              />
             </div>
           </div>
           <div>
             <span className={label}>Bio / description</span>
-            <textarea value={profile.bio} onChange={(e) => set("bio", e.target.value)} rows={3} placeholder="Good boy, patrol diplomat, sausage enthusiast..." className={input} />
+            <textarea
+              value={profile.bio}
+              onChange={(e) => set("bio", e.target.value)}
+              rows={3}
+              placeholder="Good boy, patrol diplomat, sausage enthusiast..."
+              className={input}
+            />
           </div>
         </div>
       )}
 
       {step === 1 && (
         <div className="space-y-4 rounded-lg border border-zinc-800 bg-zinc-900 p-6">
-          <p className="text-sm text-zinc-400">A few good pictures. Stored locally, base64 in SQLite.</p>
+          <p className="text-sm text-zinc-400">
+            A few good pictures. Stored locally, base64 in SQLite.
+          </p>
           <div className="flex flex-wrap gap-3">
             {pics.map((p) => (
               <div key={p.id} className="relative">
-                <img src={`data:${p.mime};base64,${p.data_base64}`} alt={p.name} className="h-28 w-28 rounded-lg border border-zinc-700 object-cover" />
-                <button onClick={() => removePic(p.id)} className="absolute right-1 top-1 rounded bg-red-900/80 p-1 text-red-300" title="Remove">
+                <img
+                  src={`data:${p.mime};base64,${p.data_base64}`}
+                  alt={p.name}
+                  className="h-28 w-28 rounded-lg border border-zinc-700 object-cover"
+                />
+                <button
+                  onClick={() => removePic(p.id)}
+                  className="absolute right-1 top-1 rounded bg-red-900/80 p-1 text-red-300"
+                  title="Remove"
+                >
                   <Trash2 size={12} />
                 </button>
               </div>
@@ -256,7 +295,14 @@ export default function Onboarding() {
             >
               <Upload size={18} /> Add
             </button>
-            <input ref={fileRef} type="file" accept="image/*" multiple hidden onChange={(e) => uploadPics(e.target.files)} />
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              multiple
+              hidden
+              onChange={(e) => uploadPics(e.target.files)}
+            />
           </div>
         </div>
       )}
@@ -267,27 +313,55 @@ export default function Onboarding() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <span className={label}>Vet name</span>
-              <input value={profile.vet_name} onChange={(e) => set("vet_name", e.target.value)} className={input} />
+              <input
+                value={profile.vet_name}
+                onChange={(e) => set("vet_name", e.target.value)}
+                className={input}
+              />
             </div>
             <div>
               <span className={label}>Vet phone</span>
-              <input value={profile.vet_phone} onChange={(e) => set("vet_phone", e.target.value)} className={input} />
+              <input
+                value={profile.vet_phone}
+                onChange={(e) => set("vet_phone", e.target.value)}
+                className={input}
+              />
             </div>
             <div>
               <span className={label}>Allergies</span>
-              <input value={profile.allergies} onChange={(e) => set("allergies", e.target.value)} placeholder="none" className={input} />
+              <input
+                value={profile.allergies}
+                onChange={(e) => set("allergies", e.target.value)}
+                placeholder="none"
+                className={input}
+              />
             </div>
             <div>
               <span className={label}>Medications</span>
-              <input value={profile.medications} onChange={(e) => set("medications", e.target.value)} placeholder="none" className={input} />
+              <input
+                value={profile.medications}
+                onChange={(e) => set("medications", e.target.value)}
+                placeholder="none"
+                className={input}
+              />
             </div>
             <div>
               <span className={label}>Last checkup</span>
-              <input value={profile.last_checkup} onChange={(e) => set("last_checkup", e.target.value)} placeholder="2026-05-01" className={input} />
+              <input
+                value={profile.last_checkup}
+                onChange={(e) => set("last_checkup", e.target.value)}
+                placeholder="2026-05-01"
+                className={input}
+              />
             </div>
             <div>
               <span className={label}>Conditions</span>
-              <input value={profile.conditions} onChange={(e) => set("conditions", e.target.value)} placeholder="none" className={input} />
+              <input
+                value={profile.conditions}
+                onChange={(e) => set("conditions", e.target.value)}
+                placeholder="none"
+                className={input}
+              />
             </div>
           </div>
         </div>
@@ -295,11 +369,17 @@ export default function Onboarding() {
 
       {step === 3 && (
         <div className="space-y-4 rounded-lg border border-zinc-800 bg-zinc-900 p-6">
-          <p className="text-sm text-zinc-400">Behaviour assessment - how the patrol should read him.</p>
+          <p className="text-sm text-zinc-400">
+            Behaviour assessment - how the patrol should read him.
+          </p>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <span className={label}>Energy level</span>
-              <select value={profile.energy_level} onChange={(e) => set("energy_level", e.target.value)} className={input}>
+              <select
+                value={profile.energy_level}
+                onChange={(e) => set("energy_level", e.target.value)}
+                className={input}
+              >
                 {["low", "medium", "high", "chaos"].map((o) => (
                   <option key={o}>{o}</option>
                 ))}
@@ -307,7 +387,11 @@ export default function Onboarding() {
             </div>
             <div>
               <span className={label}>Barkiness</span>
-              <select value={profile.barkiness} onChange={(e) => set("barkiness", e.target.value)} className={input}>
+              <select
+                value={profile.barkiness}
+                onChange={(e) => set("barkiness", e.target.value)}
+                className={input}
+              >
                 {["low", "medium", "high", "opinionated"].map((o) => (
                   <option key={o}>{o}</option>
                 ))}
@@ -315,15 +399,30 @@ export default function Onboarding() {
             </div>
             <div>
               <span className={label}>Temperament</span>
-              <input value={profile.temperament} onChange={(e) => set("temperament", e.target.value)} placeholder="friendly, stubborn, noble" className={input} />
+              <input
+                value={profile.temperament}
+                onChange={(e) => set("temperament", e.target.value)}
+                placeholder="friendly, stubborn, noble"
+                className={input}
+              />
             </div>
             <div>
               <span className={label}>Socialization</span>
-              <input value={profile.socialization} onChange={(e) => set("socialization", e.target.value)} placeholder="great with robots, wary of cats" className={input} />
+              <input
+                value={profile.socialization}
+                onChange={(e) => set("socialization", e.target.value)}
+                placeholder="great with robots, wary of cats"
+                className={input}
+              />
             </div>
             <div className="col-span-2">
               <span className={label}>Fears</span>
-              <input value={profile.fears} onChange={(e) => set("fears", e.target.value)} placeholder="vacuums, thunder, the mailman" className={input} />
+              <input
+                value={profile.fears}
+                onChange={(e) => set("fears", e.target.value)}
+                placeholder="vacuums, thunder, the mailman"
+                className={input}
+              />
             </div>
           </div>
         </div>
@@ -335,15 +434,30 @@ export default function Onboarding() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <span className={label}>Walk times</span>
-              <input value={profile.walk_times} onChange={(e) => set("walk_times", e.target.value)} placeholder="07:30, 13:00, 18:00, 22:00" className={input} />
+              <input
+                value={profile.walk_times}
+                onChange={(e) => set("walk_times", e.target.value)}
+                placeholder="07:30, 13:00, 18:00, 22:00"
+                className={input}
+              />
             </div>
             <div>
               <span className={label}>Duration (min)</span>
-              <input type="number" value={profile.walk_duration_min || ""} onChange={(e) => set("walk_duration_min", parseInt(e.target.value) || 30)} className={input} />
+              <input
+                type="number"
+                value={profile.walk_duration_min || ""}
+                onChange={(e) => set("walk_duration_min", Number.parseInt(e.target.value) || 30)}
+                className={input}
+              />
             </div>
             <div className="col-span-2">
               <span className={label}>Preferred route</span>
-              <input value={profile.walk_route} onChange={(e) => set("walk_route", e.target.value)} placeholder="canal loop, then the bakery corner" className={input} />
+              <input
+                value={profile.walk_route}
+                onChange={(e) => set("walk_route", e.target.value)}
+                placeholder="canal loop, then the bakery corner"
+                className={input}
+              />
             </div>
           </div>
         </div>
@@ -351,15 +465,36 @@ export default function Onboarding() {
 
       {step === 5 && (
         <div className="space-y-4 rounded-lg border border-zinc-800 bg-zinc-900 p-6">
-          <p className="text-sm text-zinc-400">Dogparks and drinking fountains - coordinates for the patrol route.</p>
+          <p className="text-sm text-zinc-400">
+            Dogparks and drinking fountains - coordinates for the patrol route.
+          </p>
           <div className="space-y-3">
             <div className="rounded border border-zinc-800 p-3">
               <div className="mb-2 text-sm text-green-400">Dogpark</div>
               <div className="flex flex-wrap gap-2">
-                <input value={parkName} onChange={(e) => setParkName(e.target.value)} placeholder="Name" className={input + " !w-40"} />
-                <input value={parkLat} onChange={(e) => setParkLat(e.target.value)} placeholder="Lat" className={input + " !w-28"} />
-                <input value={parkLon} onChange={(e) => setParkLon(e.target.value)} placeholder="Lon" className={input + " !w-28"} />
-                <button onClick={() => addTrack("park", parkName, parkLat, parkLon)} className="rounded bg-green-800 p-2 text-green-200 hover:bg-green-700" title="Add park">
+                <input
+                  value={parkName}
+                  onChange={(e) => setParkName(e.target.value)}
+                  placeholder="Name"
+                  className={`${input} !w-40`}
+                />
+                <input
+                  value={parkLat}
+                  onChange={(e) => setParkLat(e.target.value)}
+                  placeholder="Lat"
+                  className={`${input} !w-28`}
+                />
+                <input
+                  value={parkLon}
+                  onChange={(e) => setParkLon(e.target.value)}
+                  placeholder="Lon"
+                  className={`${input} !w-28`}
+                />
+                <button
+                  onClick={() => addTrack("park", parkName, parkLat, parkLon)}
+                  className="rounded bg-green-800 p-2 text-green-200 hover:bg-green-700"
+                  title="Add park"
+                >
                   <Plus size={14} />
                 </button>
               </div>
@@ -367,27 +502,58 @@ export default function Onboarding() {
             <div className="rounded border border-zinc-800 p-3">
               <div className="mb-2 text-sm text-sky-400">Drinking fountain</div>
               <div className="flex flex-wrap gap-2">
-                <input value={fountainName} onChange={(e) => setFountainName(e.target.value)} placeholder="Name" className={input + " !w-40"} />
-                <input value={fountainLat} onChange={(e) => setFountainLat(e.target.value)} placeholder="Lat" className={input + " !w-28"} />
-                <input value={fountainLon} onChange={(e) => setFountainLon(e.target.value)} placeholder="Lon" className={input + " !w-28"} />
-                <button onClick={() => addTrack("fountain", fountainName, fountainLat, fountainLon)} className="rounded bg-sky-900 p-2 text-sky-200 hover:bg-sky-800" title="Add fountain">
+                <input
+                  value={fountainName}
+                  onChange={(e) => setFountainName(e.target.value)}
+                  placeholder="Name"
+                  className={`${input} !w-40`}
+                />
+                <input
+                  value={fountainLat}
+                  onChange={(e) => setFountainLat(e.target.value)}
+                  placeholder="Lat"
+                  className={`${input} !w-28`}
+                />
+                <input
+                  value={fountainLon}
+                  onChange={(e) => setFountainLon(e.target.value)}
+                  placeholder="Lon"
+                  className={`${input} !w-28`}
+                />
+                <button
+                  onClick={() => addTrack("fountain", fountainName, fountainLat, fountainLon)}
+                  className="rounded bg-sky-900 p-2 text-sky-200 hover:bg-sky-800"
+                  title="Add fountain"
+                >
                   <Plus size={14} />
                 </button>
               </div>
             </div>
             <div className="space-y-1">
               {tracks.map((t) => (
-                <div key={t.id} className="flex items-center justify-between rounded bg-zinc-800/60 px-3 py-2 text-sm">
+                <div
+                  key={t.id}
+                  className="flex items-center justify-between rounded bg-zinc-800/60 px-3 py-2 text-sm"
+                >
                   <span className="text-zinc-300">
                     {t.track_type === "park" ? "Park" : "Fountain"}: {t.name}{" "}
-                    <span className="text-zinc-600">({t.lat}, {t.lon})</span>
+                    <span className="text-zinc-600">
+                      ({t.lat}, {t.lon})
+                    </span>
                   </span>
-                  <button onClick={() => removeTrack(t.id)} className="text-zinc-600 hover:text-red-400">
+                  <button
+                    onClick={() => removeTrack(t.id)}
+                    className="text-zinc-600 hover:text-red-400"
+                  >
                     <Trash2 size={14} />
                   </button>
                 </div>
               ))}
-              {tracks.length === 0 && <p className="text-xs text-zinc-600">No tracks yet - the patrol has nothing to check.</p>}
+              {tracks.length === 0 && (
+                <p className="text-xs text-zinc-600">
+                  No tracks yet - the patrol has nothing to check.
+                </p>
+              )}
             </div>
           </div>
         </div>

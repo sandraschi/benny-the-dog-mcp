@@ -5,7 +5,9 @@ export default function Tools() {
   const [tools, setTools] = useState<{ name: string; description: string }[]>([]);
 
   useEffect(() => {
-    fetchTools().then(setTools).catch(() => setTools([]));
+    fetchTools()
+      .then(setTools)
+      .catch(() => setTools([]));
   }, []);
 
   return (

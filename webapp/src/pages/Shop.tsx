@@ -1,5 +1,5 @@
+import { Plus, ShoppingCart } from "lucide-react";
 import { useEffect, useState } from "react";
-import { ShoppingCart, Plus } from "lucide-react";
 import { API_BASE } from "../lib/api";
 import { useCart } from "../store/cart";
 

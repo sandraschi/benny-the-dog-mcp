@@ -1,0 +1,45 @@
+# benny-the-dog-mcp .mcpbignore — exclusions for mcpb pack
+# Syntax identical to .gitignore
+
+# Logic/Dev Bloat
+.venv/
+node_modules/
+__pycache__/
+.ruff_cache/
+.pytest_cache/
+tests/
+
+# Discovery & Fleet Metadata
+glama.json
+llms.txt
+llms-full.txt
+.git/
+.github/
+.vscode/
+
+# Build Artifacts
+dist/
+build/
+native/
+target/
+webapp/
+web_sota/
+
+# Runtime Data & Secrets
+data/
+*.sqlite3
+*.db
+.env
+.env.*
+!.env.example
+
+# Backup Noise
+*.bak
+*.bak.*
+*.backup
+
+# Repo Artifacts
+reports/
+.assess-fix-timestamp
+.ghaudit-timestamp
+IDEAS.md

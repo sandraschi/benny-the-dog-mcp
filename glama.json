@@ -1,0 +1,37 @@
+{
+  "$schema": "https://glama.ai/mcp/schemas/server.json",
+  "maintainers": ["sandraschi"],
+  "name": "benny-the-dog-mcp",
+  "description": "Benny the dog health and care monitor - water bowls, movement, loneliness detection, sausage deliveries, projector movie time, wake calls. Boomy-robot patrol integration ready.",
+  "type": "mcp_server",
+  "status": "beta",
+  "framework": "FastMCP 3.4+",
+  "tools": 4,
+  "transport": ["stdio", "streamable-http"],
+  "keywords": [
+    "dog",
+    "pet",
+    "care",
+    "monitoring",
+    "robot",
+    "patrol",
+    "mcp-server"
+  ],
+  "features": {
+    "dog_care_events": {
+      "enabled": true
+    },
+    "loneliness_detection": {
+      "enabled": true
+    },
+    "scheduler": {
+      "enabled": true
+    },
+    "web_interface": {
+      "enabled": true
+    },
+    "sqlite_storage": {
+      "enabled": true
+    }
+  }
+}

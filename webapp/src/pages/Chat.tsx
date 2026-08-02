@@ -1,8 +1,8 @@
+import { Download, Eraser, Send } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { Send, Download, Eraser } from "lucide-react";
-import { useLlm } from "../store/llm";
-import { listModels, PROVIDERS, probeProvider } from "../lib/provider";
 import { API_BASE, fetchSkills } from "../lib/api";
+import { PROVIDERS, listModels, probeProvider } from "../lib/provider";
+import { useLlm } from "../store/llm";
 
 interface Msg {
   role: "user" | "assistant";
@@ -11,10 +11,20 @@ interface Msg {
 }
 
 const HISTORY_KEY = "benny-the-dog-mcp-chat-history";
+const PERSONALITY_KEY = "benny-the-dog-mcp-chat-personality";
 const PERSONALITIES = [
   { id: "assistant", name: "Assistant", prompt: "You are a helpful assistant." },
-  { id: "expert", name: "Expert Reviewer", prompt: "You are a rigorous expert reviewer. Be concise and critical." },
-  { id: "summarizer", name: "Quick Summarizer", prompt: "You summarize content into clear, short bullet points." },
+  {
+    id: "expert",
+    name: "Expert Reviewer",
+    prompt: "You are a rigorous expert reviewer. Be concise and critical.",
+  },
+  {
+    id: "summarizer",
+    name: "Quick Summarizer",
+    prompt: "You summarize content into clear, short bullet points.",
+  },
+  { id: "custom", name: "Custom", prompt: "" },
 ];
 
 const EXAMPLES = [
@@ -33,7 +43,12 @@ export default function Chat() {
   });
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
-  const [personality, setPersonality] = useState("assistant");
+  const [personality, setPersonality] = useState(
+    () => localStorage.getItem(PERSONALITY_KEY) ?? "assistant",
+  );
+  const [customPrompt, setCustomPrompt] = useState(
+    () => localStorage.getItem(`${PERSONALITY_KEY}-custom`) ?? "",
+  );
   const [providerOk, setProviderOk] = useState<boolean | null>(null);
   const { provider, model, setProvider, setModel } = useLlm();
   const [models, setModels] = useState<string[]>([]);
@@ -43,8 +58,9 @@ export default function Chat() {
 
   useEffect(() => {
     localStorage.setItem(HISTORY_KEY, JSON.stringify(messages.slice(-100)));
+    localStorage.setItem(PERSONALITY_KEY, personality);
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, personality]);
 
   useEffect(() => {
     let alive = true;
@@ -82,13 +98,16 @@ export default function Chat() {
     if (!text || busy) return;
     const p = PROVIDERS.find((x) => x.name === provider);
     if (!p) return;
-    const next: Msg[] = [...messages, { role: "user", content: text, ts: new Date().toISOString() }];
+    const next: Msg[] = [
+      ...messages,
+      { role: "user", content: text, ts: new Date().toISOString() },
+    ];
     setMessages(next);
     setInput("");
     setBusy(true);
     try {
       const persona = PERSONALITIES.find((x) => x.id === personality);
-      const role = persona?.prompt ?? "";
+      const role = personality === "custom" ? customPrompt : (persona?.prompt ?? "");
       const system = skillContent ? `${skillContent}\n\n---\n\n## Role\n${role}` : role;
       const r = await fetch(`${p.base}/v1/chat/completions`, {
         method: "POST",
@@ -103,11 +122,18 @@ export default function Chat() {
       });
       const j = await r.json();
       const reply = j?.choices?.[0]?.message?.content ?? "(no response)";
-      setMessages((m) => [...m, { role: "assistant", content: reply, ts: new Date().toISOString() }]);
+      setMessages((m) => [
+        ...m,
+        { role: "assistant", content: reply, ts: new Date().toISOString() },
+      ]);
     } catch (e) {
       setMessages((m) => [
         ...m,
-        { role: "assistant", content: `Error: ${e instanceof Error ? e.message : "network"}`, ts: new Date().toISOString() },
+        {
+          role: "assistant",
+          content: `Error: ${e instanceof Error ? e.message : "network"}`,
+          ts: new Date().toISOString(),
+        },
       ]);
     } finally {
       setBusy(false);
@@ -139,7 +165,9 @@ export default function Chat() {
           className="rounded border border-zinc-700 bg-zinc-800 px-2 py-1 text-sm text-zinc-100"
         >
           {PERSONALITIES.map((p) => (
-            <option key={p.id} value={p.id}>{p.name}</option>
+            <option key={p.id} value={p.id}>
+              {p.name}
+            </option>
           ))}
         </select>
         <select
@@ -149,7 +177,9 @@ export default function Chat() {
           className="rounded border border-zinc-700 bg-zinc-800 px-2 py-1 text-sm text-zinc-100"
         >
           {PROVIDERS.map((p) => (
-            <option key={p.name} value={p.name}>{p.name}</option>
+            <option key={p.name} value={p.name}>
+              {p.name}
+            </option>
           ))}
         </select>
         <select
@@ -159,7 +189,9 @@ export default function Chat() {
           className="rounded border border-zinc-700 bg-zinc-800 px-2 py-1 text-sm text-zinc-100"
         >
           {models.map((m) => (
-            <option key={m} value={m}>{m}</option>
+            <option key={m} value={m}>
+              {m}
+            </option>
           ))}
         </select>
         <span
@@ -169,9 +201,24 @@ export default function Chat() {
           {providerOk === null ? "Detecting..." : providerOk ? "Ollama on :11434" : "Not detected"}
         </span>
         {skillName && (
-          <span className="rounded bg-zinc-900 px-2 py-1 text-xs text-amber-500" data-testid="skill-indicator">
+          <span
+            className="rounded bg-zinc-900 px-2 py-1 text-xs text-amber-500"
+            data-testid="skill-indicator"
+          >
             skill:{skillName}
           </span>
+        )}
+        {personality === "custom" && (
+          <input
+            data-testid="custom-prompt"
+            value={customPrompt}
+            onChange={(e) => {
+              setCustomPrompt(e.target.value);
+              localStorage.setItem(`${PERSONALITY_KEY}-custom`, e.target.value);
+            }}
+            placeholder="Your custom system prompt..."
+            className="w-64 rounded border border-zinc-700 bg-zinc-900 px-2 py-1 text-xs text-zinc-100 outline-none focus:border-amber-500"
+          />
         )}
         <div className="ml-auto flex gap-1">
           <button
@@ -194,14 +241,15 @@ export default function Chat() {
           </button>
         </div>
       </div>
-      <div data-testid="chat-messages" className="flex-1 space-y-3 overflow-y-auto rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+      <div
+        data-testid="chat-messages"
+        className="flex-1 space-y-3 overflow-y-auto rounded-lg border border-zinc-800 bg-zinc-900 p-4"
+      >
         {messages.map((m, i) => (
           <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
             <div
               className={`max-w-[80%] whitespace-pre-wrap rounded-lg px-4 py-2 text-sm ${
-                m.role === "user"
-                  ? "bg-amber-500 text-zinc-950"
-                  : "bg-zinc-800 text-zinc-100"
+                m.role === "user" ? "bg-amber-500 text-zinc-950" : "bg-zinc-800 text-zinc-100"
               }`}
             >
               {m.content}

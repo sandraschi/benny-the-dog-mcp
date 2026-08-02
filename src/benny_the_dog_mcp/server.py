@@ -6,11 +6,15 @@ Run: uv run uvicorn benny_the_dog_mcp.server:app --host 127.0.0.1 --port 11142
 from __future__ import annotations
 
 import os
-from typing import Any
+import threading
+from collections import deque
+from datetime import datetime
+from typing import Annotated, Any, Literal
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastmcp import Context, FastMCP
+from pydantic import Field
 
 from . import db as _db
 
@@ -22,11 +26,14 @@ mcp = FastMCP(
     instructions="Fleet-standard benny-the-dog-mcp MCP server.",
 )
 
-_tauri_desktop = os.environ.get("benny_the_dog_mcpTAURI", "").lower() in ("1", "true", "yes")
+_tauri_desktop = os.environ.get("benny_the_dog_mcp_TAURI", "").lower() in ("1", "true", "yes")
+
+_README_ONLY = {"readonly": True}
+_MUTATING = {}
 
 
-@mcp.tool()
-async def app_info(ctx: Context = None) -> dict:
+@mcp.tool(annotations=_README_ONLY)
+async def app_info(ctx: Context | None = None) -> dict:
     """Return metadata about this server.
 
     ## Return Format
@@ -48,7 +55,7 @@ async def app_info(ctx: Context = None) -> dict:
 async def example_op(
     operation: str = "hello",
     name: str = "world",
-    ctx: Context = None,
+    ctx: Context | None = None,
 ) -> dict:
     """Example portmanteau tool - demonstrates the fleet operation pattern.
 
@@ -66,14 +73,25 @@ async def example_op(
     return {"success": False, "error": f"Unknown operation: {operation}"}
 
 
-
-
-@mcp.tool()
+@mcp.tool(annotations=_MUTATING)
 async def dog_ops(
-    operation: str,
-    detail: str = "",
-    actor: str = "human",
-    ctx: Context = None,
+    operation: Annotated[
+        Literal[
+            "status",
+            "water_refill",
+            "bark_event",
+            "movement",
+            "sausage_delivery",
+            "movie_time",
+            "wake",
+        ],
+        Field(description="The dog care operation to perform."),
+    ],
+    detail: Annotated[str, Field(description="Amount, notes, or cue text for the operation.")] = "",
+    actor: Annotated[
+        str, Field(description="Who performed the operation (boomy|sensor|human).")
+    ] = "human",
+    ctx: Context | None = None,
 ) -> dict:
     """Benny care operations - the fleet dog is monitored here.
 
@@ -110,7 +128,12 @@ async def dog_ops(
             "success": True,
             "operation": "status",
             "message": (
-                "Benny is " + ("possibly lonely - last movement was " + str(last_movement) if lonely else "fine")
+                "Benny is "
+                + (
+                    "possibly lonely - last movement was " + str(last_movement)
+                    if lonely
+                    else "fine"
+                )
             ),
             "data": {
                 "water_refills": len(water),
@@ -125,11 +148,21 @@ async def dog_ops(
     if operation == "water_refill":
         _db.log_dog_event("water_refill", {"actor": actor, "detail": detail})
         ring_log("benny", "INFO", f"water refilled by {actor}: {detail}")
-        return {"success": True, "operation": operation, "message": "Water bowl topped up.", "data": {}}
+        return {
+            "success": True,
+            "operation": operation,
+            "message": "Water bowl topped up.",
+            "data": {},
+        }
     if operation == "bark_event":
         _db.log_dog_event("bark_event", {"actor": actor, "detail": detail})
         ring_log("benny", "WARNING", f"bark logged: {detail}")
-        return {"success": True, "operation": operation, "message": "Bark logged - check on Benny.", "data": {}}
+        return {
+            "success": True,
+            "operation": operation,
+            "message": "Bark logged - check on Benny.",
+            "data": {},
+        }
     if operation == "movement":
         _db.log_dog_event("movement", {"actor": actor, "detail": detail})
         ring_log("benny", "INFO", f"movement detected by {actor}")
@@ -137,7 +170,12 @@ async def dog_ops(
     if operation == "sausage_delivery":
         _db.log_dog_event("sausage_delivery", {"actor": actor, "detail": detail})
         ring_log("benny", "INFO", f"emergency sausage delivered by {actor}")
-        return {"success": True, "operation": operation, "message": "Sausage delivered. Good boy points awarded.", "data": {}}
+        return {
+            "success": True,
+            "operation": operation,
+            "message": "Sausage delivered. Good boy points awarded.",
+            "data": {},
+        }
     if operation == "movie_time":
         _db.log_dog_event("movie_time", {"actor": actor, "detail": detail or "White Fang"})
         ring_log("benny", "INFO", f"projector: {detail or 'White Fang'}")
@@ -152,6 +190,27 @@ async def dog_ops(
         ring_log("benny", "INFO", f"wake call issued: {detail}")
         return {"success": True, "operation": operation, "message": "Wake call issued.", "data": {}}
     return {"success": False, "operation": operation, "error": f"Unknown operation: {operation}"}
+
+
+@mcp.tool(annotations={"destructive": True})
+async def server_shutdown(confirm: bool = False, ctx: Context | None = None) -> dict:
+    """Gracefully shut down the benny-the-dog-mcp server.
+
+    Requires confirm=True to prevent accidental termination.
+
+    ## Return Format
+    {"success": bool, "message": str}
+
+    ## Examples
+    server_shutdown(confirm=True)
+    """
+    if not confirm:
+        return {"success": False, "message": "Pass confirm=True to shut down the server."}
+    ring_log("benny", "WARNING", "server shutdown requested by agent")
+    threading.Timer(1.0, lambda: os._exit(0)).start()
+    return {"success": True, "message": "Server shutting down."}
+
+
 @mcp.resource("skill://benny_the_dog_mcp/SKILL.md")
 def get_skill() -> str:
     """Expose the bundled skill as an MCP resource."""
@@ -195,6 +254,26 @@ async def diagnostics() -> dict[str, Any]:
     }
 
 
+@app.get("/api/capabilities")
+async def capabilities() -> dict[str, Any]:
+    tools = await mcp.list_tools()
+    return {
+        "success": True,
+        "server": "benny-the-dog-mcp",
+        "features": [
+            "dog_ops",
+            "scheduler",
+            "members",
+            "shop",
+            "onboarding",
+            "llm_chat",
+            "skills",
+        ],
+        "tool_count": len(tools),
+        "transport": ["stdio", "http"],
+    }
+
+
 @app.get("/api/tools")
 async def api_tools() -> dict[str, Any]:
     tools = await mcp.list_tools()
@@ -216,7 +295,7 @@ async def api_skills() -> dict[str, Any]:
 
 
 @app.get("/skill/{skill_name}")
-async def get_skill(skill_name: str) -> str:
+async def api_skill_content(skill_name: str) -> str:
     """Return the raw SKILL.md content for a skill name."""
     from pathlib import Path
 
@@ -229,21 +308,27 @@ async def get_skill(skill_name: str) -> str:
 # ---------------------------------------------------------------------------
 # In-memory log ring buffer (fleet UiLog pattern)
 # ---------------------------------------------------------------------------
-from collections import deque
-
 _LOG_RING: deque[dict] = deque(maxlen=200)
 
 
 def ring_log(source: str, level: str, message: str) -> None:
     _LOG_RING.appendleft(
-        {"ts": __import__("datetime").datetime.now().isoformat(timespec="seconds"),
-         "source": source, "level": level, "message": message}
+        {
+            "ts": datetime.now().isoformat(timespec="seconds"),
+            "source": source,
+            "level": level,
+            "message": message,
+        }
     )
 
 
 @app.get("/api/logs")
 async def api_logs(limit: int = 50) -> dict[str, Any]:
-    return {"success": True, "entries": list(_LOG_RING)[:limit], "count": min(limit, len(_LOG_RING))}
+    return {
+        "success": True,
+        "entries": list(_LOG_RING)[:limit],
+        "count": min(limit, len(_LOG_RING)),
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -297,6 +382,7 @@ async def api_orders_create(payload: dict[str, Any]) -> dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
+
 
 # ---------------------------------------------------------------------------
 # Dog profile, pics, and tracks (onboarding data)
@@ -363,6 +449,7 @@ async def api_dog_tracks_add(payload: dict[str, Any]) -> dict[str, Any]:
 async def api_dog_tracks_delete(track_id: int) -> dict[str, Any]:
     return {"success": _db.delete_track(track_id), "id": track_id}
 
+
 # Scheduler (APScheduler periodic jobs) - the robot patrol foundation
 # ---------------------------------------------------------------------------
 if os.environ.get("ENABLE_SCHEDULER", "1") == "1":
@@ -371,37 +458,41 @@ if os.environ.get("ENABLE_SCHEDULER", "1") == "1":
     _JOBS: dict[str, dict] = {}
     _scheduler = BackgroundScheduler()
 
-
     def _patrol_tick() -> None:
         events = _db.dog_events(limit=10)
         movement = [e for e in events if e["event_type"] == "movement"]
         barks = [e for e in events if e["event_type"] == "bark_event"]
         message = "patrol completed - Benny checked"
-        if barks and (not movement or barks[0]["created_at"] > (movement[0]["created_at"] if movement else "")):
-            message = "patrol: Benny barked with no recent movement - loneliness flag, consider sausage"
+        if barks and (
+            not movement or barks[0]["created_at"] > (movement[0]["created_at"] if movement else "")
+        ):
+            message = (
+                "patrol: Benny barked with no recent movement - loneliness flag, consider sausage"
+            )
             ring_log("benny", "WARNING", "patrol flags possible loneliness")
         _JOBS["patrol"] = {
             "name": "patrol",
-            "last_run": __import__("datetime").datetime.now().isoformat(timespec="seconds"),
+            "last_run": datetime.now().isoformat(timespec="seconds"),
             "status": "ok",
             "message": message,
         }
         ring_log("scheduler", "INFO", "patrol tick - " + message)
 
-
     _scheduler.add_job(_patrol_tick, "interval", minutes=5, id="patrol")
     _scheduler.start()
     ring_log("scheduler", "INFO", "scheduler started")
 
-
     @app.get("/api/jobs")
     async def api_jobs() -> dict[str, Any]:
         jobs = [
-            {"id": j.id, "next_run": str(j.next_run_time or ""), "enabled": not j.next_run_time is None}
+            {
+                "id": j.id,
+                "next_run": str(j.next_run_time or ""),
+                "enabled": j.next_run_time is not None,
+            }
             for j in _scheduler.get_jobs()
         ]
         return {"success": True, "jobs": jobs, "runs": _JOBS}
-
 
     @app.post("/api/jobs/{job_id}/run")
     async def run_job(job_id: str) -> dict[str, Any]:
@@ -409,7 +500,6 @@ if os.environ.get("ENABLE_SCHEDULER", "1") == "1":
             _patrol_tick()
             return {"success": True, "message": "patrol dispatched"}
         return {"success": False, "error": f"unknown job: {job_id}"}
-
 
     @app.on_event("shutdown")
     async def _stop_scheduler() -> None:
@@ -429,12 +519,15 @@ if os.environ.get("ENABLE_UPLOAD", "0") == "1":
     async def upload(file: Any = None) -> dict[str, Any]:
         return {"success": False, "error": "multipart body expected"}
 
+
 if os.environ.get("ENABLE_EMAIL", "0") == "1":
+
     @app.post("/api/contact")
     async def contact(subject: str = "", body: str = "") -> dict[str, Any]:
         if not subject or not body:
             return {"success": False, "error": "subject and body required"}
         return {"success": True, "message": "email queued (configure SMTP in .env)"}
+
 
 if os.environ.get("ENABLE_REALTIME", "0") == "1":
     from fastapi import WebSocket
@@ -483,5 +576,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-

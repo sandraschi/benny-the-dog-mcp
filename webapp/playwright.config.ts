@@ -9,4 +9,19 @@ export default defineConfig({
     headless: true,
     screenshot: "only-on-failure",
   },
+  webServer: [
+    {
+      command: "uv run uvicorn benny_the_dog_mcp.server:app --host 127.0.0.1 --port 11142 --log-level warning",
+      port: 11142,
+      cwd: "..",
+      timeout: 30000,
+      reuseExistingServer: true,
+    },
+    {
+      command: "bun run dev --port 11143 --host",
+      port: 11143,
+      timeout: 30000,
+      reuseExistingServer: true,
+    },
+  ],
 });

@@ -5,8 +5,8 @@ export default function Help() {
       <section className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
         <h3 className="text-sm font-medium text-zinc-300">Architecture</h3>
         <p className="mt-1 text-sm text-zinc-400">
-          benny-the-dog-mcp is a fleet-standard fullstack app: FastMCP 3.4 backend (uvicorn),
-          React + Vite + Tailwind frontend (Bun), optional Tauri 2.0 desktop wrapper.
+          benny-the-dog-mcp is a fleet-standard fullstack app: FastMCP 3.4 backend (uvicorn), React
+          + Vite + Tailwind frontend (Bun), optional Tauri 2.0 desktop wrapper.
         </p>
       </section>
       <section className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">

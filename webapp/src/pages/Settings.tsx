@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { PROVIDERS, probeProvider, listModels } from "../lib/provider";
-import { useLlm } from "../store/llm";
 import { fetchHealth } from "../lib/api";
+import { PROVIDERS, listModels, probeProvider } from "../lib/provider";
+import { useLlm } from "../store/llm";
 
 export default function Settings() {
   const [providerStatus, setProviderStatus] = useState<Record<string, string>>({});
@@ -48,7 +48,9 @@ export default function Settings() {
             const ok = st === "detected";
             return (
               <div key={p.name} className="flex items-center justify-between text-sm">
-                <span className="text-zinc-200">{p.name} (:{(p as { port: number }).port})</span>
+                <span className="text-zinc-200">
+                  {p.name} (:{(p as { port: number }).port})
+                </span>
                 <span className={ok ? "text-green-500" : "text-zinc-500"}>
                   {st === "probing" ? "Probing..." : ok ? "Detected" : "Not found"}
                 </span>
@@ -64,7 +66,9 @@ export default function Settings() {
             className="rounded border border-zinc-700 bg-zinc-800 px-2 py-1 text-sm text-zinc-100"
           >
             {PROVIDERS.map((p) => (
-              <option key={p.name} value={p.name}>{p.name}</option>
+              <option key={p.name} value={p.name}>
+                {p.name}
+              </option>
             ))}
           </select>
           <select
@@ -74,7 +78,9 @@ export default function Settings() {
             className="rounded border border-zinc-700 bg-zinc-800 px-2 py-1 text-sm text-zinc-100"
           >
             {models.map((m) => (
-              <option key={m} value={m}>{m}</option>
+              <option key={m} value={m}>
+                {m}
+              </option>
             ))}
           </select>
         </div>

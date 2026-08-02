@@ -1,0 +1,6 @@
+{
+  "name": "benny-the-dog-mcp",
+  "version": "0.1.0",
+  "description": "Benny the dog health and care monitor - water bowls, movement, loneliness detection, sausage deliveries, projector movie time, wake calls. Boomy-robot patrol integration ready.",
+  "hooks": "../hooks/hooks.json"
+}

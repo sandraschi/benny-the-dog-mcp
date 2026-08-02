@@ -10,7 +10,9 @@ export default function Skills() {
   const [content, setContent] = useState("");
 
   useEffect(() => {
-    fetchSkills().then(setSkills).catch(() => setSkills([]));
+    fetchSkills()
+      .then(setSkills)
+      .catch(() => setSkills([]));
   }, []);
 
   useEffect(() => {
