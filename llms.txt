@@ -1,0 +1,12 @@
+# benny-the-dog-mcp
+
+Benny the dog health and care monitor - water bowls, movement, loneliness detection, sausage deliveries, projector movie time, wake calls. Boomy-robot patrol integration ready.
+
+## Links
+
+- llms-full.txt: ./llms-full.txt
+- Source: ./src/benny_the_dog_mcp/
+
+## Quick start
+
+uv sync && bun --prefix webapp install && ./start.ps1

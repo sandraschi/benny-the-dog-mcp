@@ -1,0 +1,34 @@
+# benny-the-dog-mcp - LLM Reference
+
+Benny the dog health and care monitor - water bowls, movement, loneliness detection, sausage deliveries, projector movie time, wake calls. Boomy-robot patrol integration ready.
+
+## Stack
+
+- Backend: FastMCP 3.4+ (Python, uv), served by uvicorn on 127.0.0.1:11142
+- Frontend: React 18 + Vite + TailwindCSS (dark), Bun, served on 127.0.0.1:11143
+- Storage: SQLite (local-first) - members, products, orders
+- Scheduler: APScheduler periodic jobs (patrol demo job)
+- Desktop: optional Tauri 2.0 wrapper under native/
+
+## Endpoints
+
+- GET /api/health - server name, version, uptime, tool_count
+- GET /api/v1/diagnostics - tool list + system info
+- GET /api/skills - registered skills
+- GET /api/tools - registered MCP tools
+- GET /api/logs - in-memory log ring buffer
+- GET /api/jobs - scheduler jobs (APScheduler)
+- GET/POST /api/members, DELETE /api/members/{id} - roster (SQLite)
+- GET /api/products, POST /api/orders - webshop (SQLite)
+- /mcp - MCP streamable HTTP endpoint (when enabled)
+- /docs - FastAPI Swagger UI
+
+## Start
+
+pwsh -File start.ps1        # clears ports, starts backend + frontend, opens browser
+uv run pytest tests/        # backend tests
+npx --prefix webapp playwright test   # e2e tests
+
+## Ports
+
+Backend 11142, frontend 11143 (fleet registry 10700-11500).

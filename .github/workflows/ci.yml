@@ -1,0 +1,27 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --group dev
+      - run: uv run ruff check .
+      - run: uv run pytest tests/ -q
+
+  frontend:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install
+        working-directory: webapp
+      - run: bunx tsc --noEmit
+        working-directory: webapp
+      - run: bun run build
+        working-directory: webapp
