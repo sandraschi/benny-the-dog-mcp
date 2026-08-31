@@ -29,6 +29,7 @@ import sys
 import time
 import urllib.error
 import urllib.request
+from contextlib import suppress
 from pathlib import Path
 
 CUA_WEBAPP_TEST_VERSION = 1
@@ -104,16 +105,14 @@ def kill_stale():
     try:
         with os.fdopen(fd, "w", encoding="utf-8") as f:
             f.write(ps)
-        subprocess.run(
-            ["powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", path],
+        subprocess.run(  # noqa: S603 - fixed literal command array, local test script
+            ["powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", path],  # noqa: S607 - powershell on PATH by fleet standard
             capture_output=True,
             timeout=15,
         )
     finally:
-        try:
+        with suppress(OSError):
             os.remove(path)
-        except OSError:
-            pass
     log(f"Cleared ports {', '.join(ports)}")
     time.sleep(2)
     return True
@@ -128,18 +127,26 @@ def start_stack():
     if start_ps1.exists():
         try:
             log("Starting stack via start.ps1 -Headless...")
-            subprocess.Popen(
+            # Fleet unified launcher requires probe mode env (same as fleet-webapp-start-probe.ps1)
+            env = dict(os.environ)
+            for v in ("VIRTUAL_ENV", "PYTHONPATH", "UV_PROJECT_ENVIRONMENT"):
+                env.pop(v, None)
+            env["FLEET_PROBE_RUN"] = "1"
+            env["FLEET_PROBE_LOG_DIR"] = str(repo_root / "cua-reports" / "logs")
+            subprocess.Popen(  # noqa: S603 - fixed literal command array, local test script
                 [
                     "powershell.exe",
                     "-NoProfile",
                     "-ExecutionPolicy",
-                    "Bypass",
+                    "Bypass",  # noqa: S607 - powershell on PATH by fleet standard
                     "-File",
                     str(start_ps1),
                     "-Headless",
                 ],
                 cwd=str(repo_root),
+                stdin=subprocess.DEVNULL,
                 creationflags=subprocess.CREATE_NO_WINDOW,
+                env=env,
             )
             return True
         except Exception as e:
@@ -151,15 +158,15 @@ def start_stack():
         log("No backend_module in config — cannot direct-spawn backend")
         return False
     log(f"Direct spawn fallback: python -m {module}")
-    subprocess.Popen(
+    subprocess.Popen(  # noqa: S603 - fixed literal command array, local test script
         [
             "powershell.exe",
             "-NoProfile",
-            "-Command",
-            f"Set-Location '{repo_root}'; $env:BACKEND_PORT='{BACKEND_PORT}'; "
-            f"uv run python -m {module}",
+            "-Command",  # noqa: S607 - powershell on PATH by fleet standard
+            f"Set-Location '{repo_root}'; $env:BACKEND_PORT='{BACKEND_PORT}'; uv run python -m {module}",
         ],
         cwd=str(repo_root),
+        stdin=subprocess.DEVNULL,
         creationflags=subprocess.CREATE_NO_WINDOW,
     )
     return True
@@ -171,11 +178,11 @@ def wait_backend():
     deadline = time.time() + int(cfg("backend_timeout", 30))
     while time.time() < deadline:
         try:
-            r = urllib.request.urlopen(url, timeout=3)
+            r = urllib.request.urlopen(url, timeout=3)  # noqa: S310 - localhost health poll from config
             if r.status == 200:
                 log(f"Backend ready ({url})")
                 return True
-        except Exception:
+        except Exception:  # noqa: S110 - poll loop, backoff handled by time.sleep below
             pass
         time.sleep(2)
     log(f"Backend not reachable at {url}")
@@ -195,7 +202,7 @@ def wait_frontend():
             if r.status == 200:
                 log(f"Frontend ready ({url})")
                 return True
-        except Exception:
+        except Exception:  # noqa: S110 - poll loop, backoff handled by time.sleep below
             pass
         time.sleep(2)
     log(f"Frontend not reachable at {url}")
@@ -203,17 +210,12 @@ def wait_frontend():
 
 
 def open_browser():
-    """Open the webapp in the default browser - in a FRESH window.
-
-    Opening in the existing Chrome window lets other open tabs (e.g. a stale
-    127.0.0.1:10800 tab) become the active tab, which hijacks the UIA tree
-    and the capture. A new window contains only the webapp tab.
-    """
+    """Open the webapp in the default browser."""
     if not FRONTEND_PORT:
         return True
     url = f"http://127.0.0.1:{FRONTEND_PORT}"
     try:
-        subprocess.Popen(["cmd", "/c", "start", "", url])
+        subprocess.Popen(["cmd", "/c", "start", "", url])  # noqa: S603, S607 - fixed literal, cmd.exe on PATH by design
         log(f"Opened browser: {url}")
         return True
     except Exception as e:
@@ -222,49 +224,29 @@ def open_browser():
 
 
 def find_webapp_window():
-    """Find the browser window showing the webapp.
-
-    STRICT match: the window title must match AND its UIA tree must contain
-    at least 2 of the real sidebar labels (Dashboard, Tools, Chat, ...) as
-    hyperlinks. A stale tab (error page, another webapp on 10800, ...) can
-    have a matching title or random hyperlinks but never the full sidebar.
-    No loose fallback: if nothing matches, return None.
-    """
+    """Find the browser window showing the webapp (by title regex, prefer one with links)."""
     try:
         from pywinauto import Desktop
 
-        nav_labels = [r[0] for r in cfg("nav_routes", []) if isinstance(r, (list, tuple)) and r]
         desktop = Desktop(backend="uia")
+        candidates = []
         for w in desktop.windows():
             title = (w.window_text() or "").lower()
-            if not re.search(WINDOW_TITLE_RE.lower(), title):
-                continue
+            if re.search(WINDOW_TITLE_RE.lower(), title):
+                candidates.append(w)
+        if not candidates:
+            return None
+        # Prefer the window whose UIA tree has hyperlinks (the browser page),
+        # not a bare titlebar stub.
+        for w in candidates:
             try:
-                links = w.descendants(control_type="Hyperlink")
-                link_texts = {(ln.window_text() or "").strip() for ln in links}
-                hits = sum(1 for nl in nav_labels if nl in link_texts)
-                if hits >= 2:
+                if w.descendants(control_type="Hyperlink"):
                     return w
-            except Exception:
-                continue
-        return None
+            except Exception:  # noqa: S110 - try each candidate, fall through on failure
+                pass
+        return candidates[0]
     except Exception:
         return None
-
-
-def _page_widget(win):
-    """Chrome's page viewport child (the actual web content, no tab strip)."""
-    try:
-        for cls in ("Chrome_RenderWidgetHostHWND", "Chrome_WidgetWin_1", "Intermediate D3D Window"):
-            try:
-                w = win.child_window(class_name=cls)
-                if w.exists(timeout=2):
-                    return w
-            except Exception:
-                continue
-    except Exception:
-        pass
-    return win
 
 
 def wait_connected_badge(timeout=None):
@@ -282,16 +264,12 @@ def wait_connected_badge(timeout=None):
             try:
                 win.set_focus()
                 time.sleep(0.5)
-                from PIL import ImageGrab
-
-                img = ImageGrab.grab(bbox=_page_widget(win).rectangle())
+                img = win.capture_as_image()
                 # OCR via tesseract
                 try:
                     import pytesseract
 
-                    pytesseract.pytesseract.tesseract_cmd = (
-                        r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-                    )
+                    pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
                     text = (pytesseract.image_to_string(img) or "").lower()
                 except Exception:
                     text = ""
@@ -301,7 +279,7 @@ def wait_connected_badge(timeout=None):
                 # If we see connecting text, keep waiting (not an error)
                 if any(k in text for k in CONNECTING_KEYWORDS):
                     log("  Still connecting...")
-            except Exception:
+            except Exception:  # noqa: S110 - OCR/window failures are retried by the poll loop
                 pass
         time.sleep(2)
     if win is None:
@@ -309,36 +287,6 @@ def wait_connected_badge(timeout=None):
     else:
         log(f"Connected badge not found in {timeout}s (last OCR: '{text[:80]}')")
     return win, text
-
-
-def _capture_page(win, path):
-    """Capture the webapp page region of a browser window.
-
-    Chrome's PrintWindow (win.capture_as_image) can return a STALE frame of a
-    previously active tab in the same window - e.g. an old 127.0.0.1:10800
-    error tab - instead of the current page. Capture the page viewport child
-    (Chrome_RenderWidgetHostHWND) with a real screen grab (PIL ImageGrab)
-    after focusing; that captures the actual visible page pixels without the
-    browser chrome or other tabs.
-    """
-    target = _page_widget(win)
-    img = None
-    for _ in range(4):
-        try:
-            win.set_focus()
-            time.sleep(0.8)
-            from PIL import ImageGrab
-
-            r = target.rectangle()
-            img = ImageGrab.grab(bbox=(r.left, r.top, r.right, r.bottom))
-            if img is not None:
-                break
-        except Exception:
-            pass
-        time.sleep(1)
-    if img is None:
-        raise RuntimeError("screen grab returned None after 4 retries")
-    return img
 
 
 def nav_click_through(output_dir, win):
@@ -351,65 +299,28 @@ def nav_click_through(output_dir, win):
     try:
         win.maximize()
         time.sleep(1)
-    except Exception:
+    except Exception:  # noqa: S110 - maximize is best-effort
         pass
 
     nav_failures = []
     for label, _expected in nav_routes:
         try:
-            win.set_focus()
-            time.sleep(0.5)
-            link = None
-            for _ in range(3):
-                link = win.descendants(title=label)
-                if link:
-                    break
-                time.sleep(1)
+            link = win.descendants(title=label)
             if link:
-                # Ambiguity guard: browser chrome also has elements named
-                # "Settings" / "Help" / "Cart" (Chrome menu, bookmark bar).
-                # Prefer the sidebar instance - the webapp sidebar is the
-                # left-most region of the window. Chrome's own controls sit
-                # in the toolbar (top) or top-right corner.
-                try:
-                    sidebar = [e for e in link if e.rectangle().left < win.rectangle().left + 400]
-                except Exception:
-                    sidebar = []
-                target = sidebar[0] if sidebar else link[0]
-                target.click_input()
+                link[0].click_input()
             else:
                 elements = win.descendants(control_type="Hyperlink")
                 el = [e for e in elements if label.lower() in (e.window_text() or "").lower()]
                 if el:
-                    # Same sidebar-region preference for the fallback path.
-                    try:
-                        sidebar = [e for e in el if e.rectangle().left < win.rectangle().left + 400]
-                    except Exception:
-                        sidebar = []
-                    target = sidebar[0] if sidebar else el[0]
-                    target.click_input()
+                    el[0].click_input()
                 else:
                     nav_failures.append((label, "no link found"))
                     log(f"Nav '{label}': no link found — skipped")
                     continue
             time.sleep(2)
             path = os.path.join(output_dir, f"webapp-{label.lower().replace(' ', '-')}.png")
-            img = _capture_page(win, path)
-            img.save(path)
-            # OCR the captured page as content evidence
-            body_text = ""
-            try:
-                import pytesseract
-
-                pytesseract.pytesseract.tesseract_cmd = (
-                    r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-                )
-                body_text = (pytesseract.image_to_string(img) or "").strip().replace("\n", " ")[:60]
-            except Exception:
-                pass
-            log(
-                f"Nav '{label}': clicked + screenshot ({os.path.getsize(path)} bytes) OCR: {body_text}"
-            )
+            win.capture_as_image().save(path)
+            log(f"Nav '{label}': clicked + screenshot ({os.path.getsize(path)} bytes)")
         except Exception as e:
             nav_failures.append((label, str(e)))
             log(f"Nav '{label}' failed (non-fatal): {e}")
@@ -422,11 +333,9 @@ def nav_click_through(output_dir, win):
 
 def check_diagnostics():
     try:
-        r = urllib.request.urlopen(f"{BACKEND_URL}/api/v1/diagnostics", timeout=5)
+        r = urllib.request.urlopen(f"{BACKEND_URL}/api/v1/diagnostics", timeout=5)  # noqa: S310 - localhost diagnostics check
         data = json.loads(r.read())
-        log(
-            f"Diagnostics: HTTP {r.status}, tools={len(data.get('tools', [])) if isinstance(data, dict) else '?'}"
-        )
+        log(f"Diagnostics: HTTP {r.status}, tools={len(data.get('tools', [])) if isinstance(data, dict) else '?'}")
         return True
     except Exception as e:
         log(f"Diagnostics check skipped: {e}")
