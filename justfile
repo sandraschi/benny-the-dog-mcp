@@ -23,16 +23,14 @@ test:
     uv run pytest tests/ -q
 
 e2e:
-    Set-Location webapp
-    npx playwright test
+    Set-Location webapp; npx playwright test
 
 cua-webapp-test:
     uv run python scripts/cua-webapp-test.py
 
 bootstrap:
     uv sync
-    Set-Location webapp
-    bun install
+    Set-Location webapp; bun install
 
 gates-green: lint types test
 
