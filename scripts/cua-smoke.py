@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """CUA smoke test for NSIS-installed fleet apps (pywinauto-mcp canary).
 
-CUA_SMOKE_VERSION = 3
+CUA_SMOKE_VERSION = 7
 If this file differs from templates/tauri-native/scripts/cua-smoke.py in
 mcp-central-docs, copy the template over — version number will have changed.
 
@@ -58,14 +58,13 @@ def load_config(path: str | None = None) -> dict:
     return {k: _expand(v) for k, v in cfg.items()}
 
 
-CUA_SMOKE_VERSION = 3  # bump when template changes; see docstring
+CUA_SMOKE_VERSION = 7  # bump when template changes; see docstring
 
 
 def _check_version():
     """Warn if this file doesn't match the template version."""
     from pathlib import Path
 
-    ver_file = Path(__file__)
     # If the template path exists, compare versions
     tpl = Path(os.getenv("MCP_CENTRAL_DOCS", "")) / "templates/tauri-native/scripts/cua-smoke.py"
     if tpl.exists():
@@ -102,7 +101,11 @@ OPERATOR_EXE = cfg("operator_exe", "pywinauto-mcp-operator.exe")
 PROCESS_NAMES = cfg("backend_process_names", ["pywinauto-mcp-operator", "pywinauto-mcp-backend"])
 NSIS_GLOB = cfg("nsis_glob", "web_sota/src-tauri/target/release/bundle/nsis/Pywinauto MCP Operator_*_x64-setup.exe")
 REGISTRY_FILTER = cfg("uninstall_registry_filter", "*Pywinauto*")
-MAX_RETRY = 10
+# 60s budget: a freshly-installed PyInstaller onefile backend exe triggers a
+# fresh Windows Defender real-time scan on top of onefile self-extraction to
+# %TEMP%\_MEI*, measured ~35-40s cold; the old 30s budget declared FATAL
+# while the backend was still healthy (see TRAPS_AND_PITFALLS.md).
+MAX_RETRY = 20
 RETRY_DELAY = 3
 
 _INSTALLED = False
@@ -147,25 +150,36 @@ def _get_window(handle: int):
     return app.window(handle=handle)
 
 
-def cua_find_window(title_re: str = "") -> dict | None:
-    """Find a window by title regex. Returns {handle, title, rect} or None."""
-    try:
-        import pywinauto
+def cua_find_window(title_re: str = "", retry_seconds: int = 10) -> dict | None:
+    """Find a window by title regex. Returns {handle, title, rect} or None.
 
-        wins = pywinauto.findwindows.find_elements(title_re=title_re)
-        tauri = [w for w in wins if w.class_name != "QMainWindow"]
-        if not tauri:
+    Retries for up to `retry_seconds` (1s poll) - the backend can report
+    healthy before the WebView2 window has finished initializing and
+    rendering, so a single immediate lookup right after the health check
+    is a common false-negative source (window genuinely appears a couple
+    seconds later).
+    """
+    import pywinauto
+
+    deadline = time.monotonic() + retry_seconds
+    while True:
+        try:
+            wins = pywinauto.findwindows.find_elements(title_re=title_re)
+            tauri = [w for w in wins if w.class_name != "QMainWindow"]
+            if tauri:
+                handle = tauri[0].handle
+                app = pywinauto.Application(backend="uia").connect(handle=handle)
+                win = app.window(handle=handle)
+                win.wait("visible", timeout=5)
+                rect = win.rectangle()
+                w = rect.width if isinstance(rect.width, int) else rect.width()
+                h = rect.height if isinstance(rect.height, int) else rect.height()
+                return {"handle": handle, "title": win.window_text(), "rect": {"left": rect.left, "top": rect.top, "width": w, "height": h}}
+        except Exception:
+            pass
+        if time.monotonic() >= deadline:
             return None
-        handle = tauri[0].handle
-        app = pywinauto.Application(backend="uia").connect(handle=handle)
-        win = app.window(handle=handle)
-        win.wait("visible", timeout=5)
-        rect = win.rectangle()
-        w = rect.width if isinstance(rect.width, int) else rect.width()
-        h = rect.height if isinstance(rect.height, int) else rect.height()
-        return {"handle": handle, "title": win.window_text(), "rect": {"left": rect.left, "top": rect.top, "width": w, "height": h}}
-    except Exception:
-        return None
+        time.sleep(1)
 
 
 def cua_screenshot(window_handle: int = 0, output_path: str = "") -> str | None:
@@ -376,7 +390,7 @@ def check_diagnostics():
             )
             log(f"Tools: {d['tools'].get('total')} registered")
             log(f"CUA: Tesseract={d['cua_status']['tesseract_available']} Window={d['cua_status']['window_found']}")
-            if d.get("errors", {}).get("count", 0) > 0:
+            if data.get("errors", {}).get("count", 0) > 0:
                 log(f"WARNING: {d['errors']['count']} errors logged")
         else:
             log(f"Diagnostics returned: {data}")
@@ -413,7 +427,23 @@ def verify_webview_bridge(output_dir: str):
 def _verify_page_ocr(text: str, label: str, expected: str) -> bool:
     """Check OCR text for page validity. Returns True if page seems OK."""
     text_lower = text.lower()
-    fail_keywords = ["404", "not found", "could not find", "error", "timeout", "internal server error", "bad gateway"]
+    # Bare "error"/"timeout" are too broad: legitimate pages describe error-handling
+    # behavior, show log entries with an ERROR level, or have a "Timeout (s)" settings
+    # field. Use specific failure phrases instead (found via teleoperator-mcp's Inbox
+    # page false-positiving on "Warnings and errors are surfaced" descriptive text).
+    fail_keywords = [
+        "404",
+        "not found",
+        "could not find",
+        "internal server error",
+        "bad gateway",
+        "unexpected error",
+        "an error occurred",
+        "application error",
+        "failed to load",
+        "connection timed out",
+        "request timed out",
+    ]
     for kw in fail_keywords:
         if kw in text_lower:
             log(f"  Page '{label}': ERROR keyword '{kw}' found in OCR")
@@ -461,7 +491,7 @@ def _nav_click_element(win_handle: int, wx: int, wy: int, idx: int, label: str =
             return
     except Exception:
         pass
-    # Try Pane (some WebView versions)  
+    # Try Pane (some WebView versions)
     try:
         elements = w.descendants(control_type="Pane")
         nav_elements = [e for e in elements if e.rectangle().left < wx + 200]
@@ -639,6 +669,12 @@ def main():
     print(f"  CUA Smoke Test — {PRODUCT_NAME}")
     print(f"{'=' * 50}\n")
 
+    if not _HAS_PYWAUTO:
+        print("  !!! WARNING: pywinauto is not importable in this venv. !!!")
+        print("  !!! Every GUI-driven phase will be SILENTLY SKIPPED.   !!!")
+        print("  !!! Run: uv add --dev pywinauto pillow pytesseract     !!!")
+        print("  !!! This run cannot verify the UI actually works.\n")
+
     try:
         for is_fatal, name, fn in phases:
             print(f"  Phase {phases.index((is_fatal, name, fn)) + 1}: {name}")
@@ -661,10 +697,19 @@ def main():
 
     print(f"{'=' * 50}")
     print(f"  Result: {passed}/{passed + failed} phases passed")
+    if not _HAS_PYWAUTO:
+        print("  WARNING: pywinauto was NOT importable in this venv — every GUI-driven")
+        print("  phase (window verify, screenshot, WebView OCR, nav click-through) was")
+        print("  SILENTLY SKIPPED, not verified. This run does NOT prove the UI works.")
+        print("  Fix: add pywinauto, pillow, pytesseract as dev dependencies and re-run.")
     if failed:
         print(f"  {failed} phase(s) FAILED")
     if fatal_failed:
         print("  FATAL phase failure — see above")
+        sys.exit(1)
+    if failed or not _HAS_PYWAUTO:
+        print("  NOT ALL PHASES PASSED — do not report this run as a clean pass")
+        print(f"{'=' * 50}\n")
         sys.exit(1)
     print("  ALL PHASES PASSED")
     print(f"{'=' * 50}\n")

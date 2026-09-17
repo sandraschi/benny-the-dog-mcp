@@ -18,10 +18,10 @@ webapp/.vite/
 webapp/.cache/
 webapp/*.tsbuildinfo
 *.tsbuildinfo
-native/target/
-native/gen/
-native/resources/*.exe
-native/binaries/*.exe
+src-tauri/target/
+src-tauri/gen/
+src-tauri/resources/*.exe
+src-tauri/binaries/*.exe
 mcpb/src/
 mcpb/assets/
 data/
