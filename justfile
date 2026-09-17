@@ -28,6 +28,12 @@ e2e:
 cua-webapp-test:
     uv run python scripts/cua-webapp-test.py
 
+build-native:
+    powershell.exe -NoProfile -File src-tauri/build.ps1
+
+cua-nsis-test:
+    uv run python scripts/cua-smoke.py
+
 bootstrap:
     uv sync
     Set-Location webapp; bun install
