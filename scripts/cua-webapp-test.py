@@ -271,7 +271,9 @@ def wait_connected_badge(timeout=None):
                 try:
                     import pytesseract
 
-                    pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+                    pytesseract.pytesseract.tesseract_cmd = (
+                        r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+                    )
                     text = (pytesseract.image_to_string(img) or "").lower()
                 except Exception:
                     text = ""
@@ -358,11 +360,15 @@ def nav_click_through(output_dir, win):
 
     labels = [label for label, _el in _sidebar_links(win)]
     if not labels:
-        log("FAIL: no sidebar links discovered (icon-only collapsed sidebar, or nav is not <a> links)")
+        log(
+            "FAIL: no sidebar links discovered (icon-only collapsed sidebar, or nav is not <a> links)"
+        )
         return False
     log(f"Discovered {len(labels)} sidebar pages: {', '.join(labels)}")
     if cfg("nav_routes"):
-        log("config nav_routes is ignored: pages are discovered from the sidebar (you can remove it)")
+        log(
+            "config nav_routes is ignored: pages are discovered from the sidebar (you can remove it)"
+        )
     _log_nav_changes(output_dir, labels)
 
     failures = [
@@ -384,7 +390,12 @@ def nav_click_through(output_dir, win):
             slug = re.sub(r"[^a-z0-9]+", "-", label.lower()).strip("-")
             img.save(os.path.join(output_dir, f"webapp-{index:02d}-{slug}.png"))
             if digest == previous:
-                failures.append((label, "screenshot identical to the previous page: navigation had no visible effect"))
+                failures.append(
+                    (
+                        label,
+                        "screenshot identical to the previous page: navigation had no visible effect",
+                    )
+                )
             previous = digest
             log(f"Nav {index}/{len(labels)} '{label}': ok")
         except Exception as e:
@@ -401,7 +412,9 @@ def check_diagnostics():
     try:
         r = urllib.request.urlopen(f"{BACKEND_URL}/api/v1/diagnostics", timeout=5)  # noqa: S310 - localhost diagnostics check
         data = json.loads(r.read())
-        log(f"Diagnostics: HTTP {r.status}, tools={len(data.get('tools', [])) if isinstance(data, dict) else '?'}")
+        log(
+            f"Diagnostics: HTTP {r.status}, tools={len(data.get('tools', [])) if isinstance(data, dict) else '?'}"
+        )
         return True
     except Exception as e:
         log(f"Diagnostics check skipped: {e}")

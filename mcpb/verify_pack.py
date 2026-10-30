@@ -127,7 +127,9 @@ def check_pollution(mcpb_dir: str) -> None:
         bad.extend(root.rglob(pattern))
     if bad:
         listing = "\n  ".join(str(p) for p in bad[:20])
-        raise SystemExit(f"FAIL pollution: {len(bad)} disallowed path(s) under {mcpb_dir}:\n  {listing}")
+        raise SystemExit(
+            f"FAIL pollution: {len(bad)} disallowed path(s) under {mcpb_dir}:\n  {listing}"
+        )
     print(f"OK pollution: {mcpb_dir} is clean")
 
 
